@@ -1,5 +1,10 @@
-# arcpy_toolbox_sen2cube
-Development of an arcpy script toolbox.
+## Progress for developing toolbox
+
+1. Clone environment in arcgis pro
+2. Add Typing as a package
+3. Create new script toolbox
+4. create the parameters as shown in the bottom image
+
 
 ![image](https://user-images.githubusercontent.com/81073205/153046312-038211aa-7188-43fc-bb84-1f4423669383.png)
 
