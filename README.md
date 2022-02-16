@@ -10,7 +10,6 @@ Steps
 4. create the parameters as shown in the bottom image
 
 
-![image](https://user-images.githubusercontent.com/81073205/153046312-038211aa-7188-43fc-bb84-1f4423669383.png)
+![image](https://user-images.githubusercontent.com/81073205/154336995-c8248039-7795-4053-bd91-5e55ccc9dacd.png)
 
-![image](https://user-images.githubusercontent.com/81073205/153046399-082232f3-f8e4-408e-8daa-57d7581cad7f.png)
- 
+![image](https://user-images.githubusercontent.com/81073205/154336954-0a7f0f62-6fe1-4579-ad14-35d2e5110071.png)
