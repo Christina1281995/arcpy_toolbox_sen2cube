@@ -3,7 +3,6 @@ import requests_oauthlib
 import oauthlib
 import json
 import os
-import getpass
 
 import tkinter as tk
 import tkinter.ttk as ttk
@@ -59,24 +58,25 @@ if __name__ == '__main__':
 
     token = ""
 
+    # create pop-up window for log in as soon as "Run" is clicked
     first = tk.Tk()
+    #style elements
     s = ttk.Style()
     s.theme_use('alt')
-
     first.geometry('400x150')
     first.title('Sen2Cube Login Window')
 
-
-
+    # pop up window content
     L1 = tk.Label(first, text="Username:", font=(14)).grid(row=0, column=0, padx=5, pady=5)
     L2 = tk.Label(first, text="Password:", font=(14)).grid(row=1, column=0, padx=5, pady=5)
-
 
     username_input = tk.StringVar()
     password_input = tk.StringVar()
 
     t1 = tk.Entry(first, textvariable=username_input, font=(14)).grid(row=0,column=1)
     t2 = tk.Entry(first, textvariable=password_input, font=(14), show='*').grid(row=1, column=1)
+
+    # button functions
 
     def login():
       username = username_input.get()
