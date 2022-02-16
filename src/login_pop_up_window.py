@@ -1,3 +1,19 @@
+"""
+Tool:               Sen2Cube ArcGIS PoC
+Source Name:        <File name>
+Version:            ArcGIS Pro 2.9
+Author:             Niklas Jaggy, Christina Zorenboehmer
+Usage:              <Command syntax>
+Required Arguments: <parameter0>
+                    <parameter1>
+Optional Arguments: <parameter2>
+                    <parameter3>
+
+Description:        This script tool serves as a simple proof of concept. It demonstrates the compatibility
+                    of the Sen2Cube EO Data Cube with ArcGIS Pro such that registered users can access the
+                    application directly from within their ArcGIS Pro desktop software.
+"""
+
 import arcpy
 import requests_oauthlib
 import oauthlib
@@ -67,7 +83,7 @@ if __name__ == '__main__':
     first.title('Sen2Cube Login')
     # icon
     # TODO: figure out how to add online URL in here.
-    first.iconbitmap(r"C:\Users\s1080384\Downloads\sen2icon.ico")
+    first.iconbitmap(r"C:\Users\b1080788\Documents\sen2icon.ico")
 
     # pop up window content
     L1 = tk.Label(first, text="Username:", font=(14)).grid(row=0, column=0, padx=15, pady=15)
