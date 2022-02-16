@@ -1,0 +1,4 @@
+
+A standalone python script is not a geoprocessing tool, and the import of arcpy does not replicate all of the behaviors that operate within an open session of ArcMap.  Environment settings that apply directly to an open session of ArcMap are ignored by Python scripts, such as arcpy.overwriteOutputs = True and arcpy.addOutputsToMap = True; but they are exposed through arcpy to control the user experience in an open session of ArcMap (i.e., whatever arcpy did to these settings will persist and affect how ArcMap responds when the user tries to save over a file or run a geoprocessing tool, so a programmer can control user capabilities).
+
+You need to explicitly do these tasks with arcpy.  You have to use the arcpy.mapping.AddLayer method to have your script add layers after creating new data.  You also cannot overwrite data, and have to test if it exists and then delete it with arcpy.Exists() and arcpy.Delete_management() (the Exist sample code demonstrates this).
