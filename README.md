@@ -1,5 +1,9 @@
-## Progress for developing toolbox
+<img src="https://manual.sen2cube.at/img/logo_b.png" height="200px">
 
+
+## Proof of Concept for an ArcGIS Pro Script Toolbox
+
+Steps
 1. Clone environment in arcgis pro
 2. Add Typing as a package
 3. Create new script toolbox
