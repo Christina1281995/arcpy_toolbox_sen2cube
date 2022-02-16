@@ -72,9 +72,10 @@ if __name__ == '__main__':
 
     username_input = tk.StringVar()
     password_input = tk.StringVar()
-
+    
+    # text entries (censor password entry)
     t1 = tk.Entry(first, textvariable=username_input, font=(14)).grid(row=0,column=1)
-    t2 = tk.Entry(first, textvariable=password_input, font=(14), show='*').grid(row=1, column=1)
+    t2 = tk.Entry(first, textvariable=password_input, font=(14), show='\u2022').grid(row=1, column=1)
 
     # button functions
 
