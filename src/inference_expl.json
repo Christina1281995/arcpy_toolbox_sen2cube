@@ -1,0 +1,28 @@
+{
+    "data": {
+        "type": "inference",
+        "attributes": {
+            "owner": "niklas.jaggy",
+            "area_of_interest": "{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"properties\":{\"name\":\"Area-of-interest00\"},\"geometry\":{\"type\":\"Point\",\"coordinates\":[9.878426,47.638661]}},{\"type\":\"Feature\",\"properties\":{\"name\":\"Area-of-interest01\"},\"geometry\":{\"type\":\"Point\",\"coordinates\":[10.375557,47.573848]}},{\"type\":\"Feature\",\"properties\":{\"name\":\"Area-of-interest02\"},\"geometry\":{\"type\":\"Point\",\"coordinates\":[10.034981,47.464409]}}]}",
+            "temp_range_start": "2018-01-01T00:00:00+00:00",
+            "temp_range_end": "2018-12-31T23:59:59.999000+00:00",
+            "comment": "snow_timeseries - dieser Kommentar kann dazu dienendie inference wiederzuerkennen. Hier könnt ihr auch eure eigenen IDsunterbringen etc.",
+            "favourite": true,
+            "output_scale_factor": 1
+        },
+        "relationships": {
+            "knowledgebase": {
+                "data": {
+                    "type": "knowledgebase",
+                    "id": "2150"
+                }
+            },
+            "factbase": {
+                "data": {
+                    "type": "factbase",
+                    "id": "1"
+                }
+            }
+        }
+    }
+}
