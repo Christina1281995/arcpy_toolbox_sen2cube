@@ -23,6 +23,7 @@ import oauthlib
 import json
 import os
 import time
+import urllib
 
 
 import tkinter as tk
@@ -184,9 +185,57 @@ if __name__ == '__main__':
 
 # --------------------------- STEP 3: SEND GET REQUEST WITH INFERENCE ID TO CHECK STATUS -------------------------------
 
-    while status != "SUCCEEDED":
+# TODO make work.
+
+    inf_status_endpoint = "https://api.sen2cube.at/v1/inference?fields[inference]=status"
+
+    status = ""
+
+    while True:
         # Wait 5 seconds
         time.sleep(5)
         # re-send get request with inference ID
+        arcpy.AddMessage(status)
+        arcpy.AddMessage(inference_id)
+
+        with requests.Session() as s:
+            s.headers.update(headers)
+            inflist = s.get(inf_status_endpoint).json()
+            for i in inflist.get("data"):
+                if i["id"] == inference_id:
+                    status = (i.get("attributes", {}).get("status"))
+        s.close()
+        if status == "SUCCEEDED":
+            #arcpy.AddMessage(status)
+            break
 
 
+    arcpy.AddMessage("Inference complete.")
+    with requests.Session() as s:
+        s.headers.update(headers)
+        new_endpoint = "https://api.sen2cube.at/v1/inference" + str(inference_id)
+        target_inf = s.get(new_endpoint).json()
+        arcpy.AddMessage(target_inf)
+
+
+
+
+
+
+# --------------------------- STEP 4: ASK USER FOR FOLDER LOCATOIN AND DOWNLOAD GEOTIFF -------------------------------
+
+"""
+    # get user input
+    out_dir = arcpy.GetParameter(3)
+    arcpy.AddMessage(out_dir)
+
+    # Download files
+    # Parse filename
+    fname = "made-up.TIF"  # TODO properly
+    outfp = os.path.join(outdir, fname)
+    # Download the file if it does not exist already
+    if not os.path.exists(outfp):
+        print("Downloading", fname)
+        r = urllib.request.urlretrieve(url, outfp)
+
+"""
