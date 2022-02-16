@@ -14,6 +14,8 @@ Description:        This script tool serves as a simple proof of concept. It dem
                     application directly from within their ArcGIS Pro desktop software.
 """
 
+
+# -------------------------------------------------- IMPORTS-----------------------------------------------------------
 import arcpy
 import requests
 import requests_oauthlib
@@ -32,7 +34,9 @@ from oauthlib.oauth2 import InvalidGrantError, LegacyApplicationClient, OAuth2To
 from requests import Response
 from requests_oauthlib import OAuth2Session
 
-# envs
+
+# ---------------------------------------------- ENVS AND FUNCTIONS ----------------------------------------------------
+
 auth_token_url = "https://auth.sen2cube.at/realms/sen2cube-at/protocol/openid-connect/token"
 auth_client_id = "iq-web-client"
 
@@ -74,7 +78,7 @@ def fetch_token(username: str, password: str,
 # This is used to execute code if the file was run but not imported
 if __name__ == '__main__':
 
-    # STEP 1: USER LOGIN AND GET TOKEN
+#-------------------------------------- STEP 1: USER LOGIN AND GET TOKEN ----------------------------------------------
 
     token_text = ""
 
@@ -125,7 +129,7 @@ if __name__ == '__main__':
     popup.mainloop()
 
 
-    # STEP 2: POST INFERENCE
+# ------------------------------------- STEP 2: SEND POST INFERENCE REQUEST -------------------------------------------
 
     # TODO make dynamic
     knowledgebase_id = "2150"
@@ -160,7 +164,7 @@ if __name__ == '__main__':
         }
     }
 
-    # Send Post Request
+    # Assemble Post Request
     headers = {'Authorization':'Bearer {}'.format(token_text["access_token"]), 'Content-Type':'application/json'}
     url = "https://api.sen2cube.at/v1/inference"
     data = json.dumps(inference_body)
@@ -177,11 +181,12 @@ if __name__ == '__main__':
     # print inference ID
     arcpy.AddMessage("Returned inference ID is: " + str(inference_id))
 
-    # Send Get Request to Check Status of Inference
+
+# --------------------------- STEP 3: SEND GET REQUEST WITH INFERENCE ID TO CHECK STATUS -------------------------------
 
     while status != "SUCCEEDED":
         # Wait 5 seconds
         time.sleep(5)
         # re-send get request with inference ID
-        
+
 
