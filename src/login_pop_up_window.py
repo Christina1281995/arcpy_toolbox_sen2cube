@@ -13,7 +13,6 @@ Description:        This script tool serves as a simple proof of concept. It dem
                     of the Sen2Cube EO Data Cube with ArcGIS Pro such that registered users can access the
                     application directly from within their ArcGIS Pro desktop software.
 """
-
 import arcpy
 import requests_oauthlib
 import oauthlib
@@ -75,30 +74,28 @@ if __name__ == '__main__':
     token = ""
 
     # create pop-up window for log in as soon as "Run" is clicked
-    first = tk.Tk()
+    popup = tk.Tk()
     #style elements
     s = ttk.Style()
     s.theme_use('alt')
-    first.geometry('400x150')
-    first.title('Sen2Cube Login')
+    popup.geometry('400x150')
+    popup.title('Sen2Cube Login')
     # icon
     # TODO: figure out how to add online URL in here.
-    first.iconbitmap(r"C:\Users\b1080788\Documents\sen2icon.ico")
+    popup.iconbitmap(r"C:\Users\b1080788\Documents\sen2icon.ico")
 
     # pop up window content
-    L1 = tk.Label(first, text="Username:", font=(14)).grid(row=0, column=0, padx=15, pady=15)
-    L2 = tk.Label(first, text="Password:", font=(14)).grid(row=1, column=0, padx=5, pady=5)
+    L1 = tk.Label(popup, text="Username:", font=(14)).grid(row=0, column=0, padx=15, pady=15)
+    L2 = tk.Label(popup, text="Password:", font=(14)).grid(row=1, column=0, padx=5, pady=5)
 
     username_input = tk.StringVar()
     password_input = tk.StringVar()
 
     # text entries (censor password entry)
-    t1 = tk.Entry(first, textvariable=username_input, font=(14)).grid(row=0,column=1)
-    t2 = tk.Entry(first, textvariable=password_input, font=(14), show='\u2022').grid(row=1, column=1)
+    t1 = tk.Entry(popup, textvariable=username_input, font=(14)).grid(row=0, column=1)
+    t2 = tk.Entry(popup, textvariable=password_input, font=(14), show='\u2022').grid(row=1, column=1)
 
     # button functions
-
-    # TODO: close pop up window on clicks
     def login():
       username = username_input.get()
       password = password_input.get()
@@ -107,15 +104,21 @@ if __name__ == '__main__':
       result = fetch_token(username, password, auth_token_url, auth_client_id)
       print(result)
       token = result
+      popup.destroy()
       return token
 
 
     def cancel():
       arcpy.AddError('Login process was cancelled.')
+      popup.destroy()
+      sys.exit(0)
 
-    b1 = tk.Button(first, command=login, text='Login', font=(14)).grid(row=2, column=1, sticky=tk.W)
-    b2 = tk.Button(first, command=cancel, text='Cancel', font=(14)).grid(row=2, column=1, sticky=tk.E)
 
-    first.mainloop()
+    popup.bind('<Return>', login)
+
+    tk.Button(popup, command=login, text='Login', font=(14)).grid(row=2, column=1, sticky=tk.W)
+    tk.Button(popup, command=cancel, text='Cancel', font=(14)).grid(row=2, column=1, sticky=tk.E)
+
+    popup.mainloop()
 
 
