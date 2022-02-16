@@ -64,21 +64,25 @@ if __name__ == '__main__':
     s = ttk.Style()
     s.theme_use('alt')
     first.geometry('400x150')
-    first.title('Sen2Cube Login Window')
+    first.title('Sen2Cube Login')
+    # icon
+    # TODO: figure out how to add online URL in here.
+    first.iconbitmap(r"C:\Users\s1080384\Downloads\sen2icon.ico")
 
     # pop up window content
-    L1 = tk.Label(first, text="Username:", font=(14)).grid(row=0, column=0, padx=5, pady=5)
+    L1 = tk.Label(first, text="Username:", font=(14)).grid(row=0, column=0, padx=15, pady=15)
     L2 = tk.Label(first, text="Password:", font=(14)).grid(row=1, column=0, padx=5, pady=5)
 
     username_input = tk.StringVar()
     password_input = tk.StringVar()
-    
+
     # text entries (censor password entry)
     t1 = tk.Entry(first, textvariable=username_input, font=(14)).grid(row=0,column=1)
     t2 = tk.Entry(first, textvariable=password_input, font=(14), show='\u2022').grid(row=1, column=1)
 
     # button functions
 
+    # TODO: close pop up window on clicks
     def login():
       username = username_input.get()
       password = password_input.get()
@@ -91,7 +95,7 @@ if __name__ == '__main__':
 
 
     def cancel():
-      arcpy.AddMessage('was cancelled')
+      arcpy.AddError('Login process was cancelled.')
 
     b1 = tk.Button(first, command=login, text='Login', font=(14)).grid(row=2, column=1, sticky=tk.W)
     b2 = tk.Button(first, command=cancel, text='Cancel', font=(14)).grid(row=2, column=1, sticky=tk.E)
