@@ -1,7 +1,12 @@
-<img src="https://manual.sen2cube.at/img/logo_b.png" height="200px">
+<img src="https://manual.sen2cube.at/img/logo_b.png" height="150px" align="center">
 
 
-## Proof of Concept for an ArcGIS Pro Script Toolbox
+## Proof of Concept: An ArcGIS Pro Script Toolbox for Sen2Cube
+
+### TO DO
+- 
+
+
 
 Steps
 1. Clone environment in arcgis pro
