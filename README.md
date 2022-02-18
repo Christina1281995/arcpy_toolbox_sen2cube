@@ -5,7 +5,7 @@
 
 This script tool serves as a simple proof of concept to demonstrate the compatibility of the Sen2Cube EO Data Cube with ArcGIS Pro such that registered users can access the application directly from within their ArcGIS Pro desktop software.
 
-## TO-DO
+## To-Do
 - User input for Area of Interest (arcpy function to get information on CRS, then get extent in that CRS and use for AOI)
    - Validate the AOI (area size, location within given Factbase)
 - Validate Time range against Factbase
