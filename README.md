@@ -4,17 +4,14 @@
 ## Proof of Concept: An ArcGIS Pro Script Toolbox for Sen2Cube
 
 ### TO DO
-- 
+- User input for Area of Interest (arcpy function to get information on CRS, then get extent in that CRS and use for AOI)
+   - Validate the AOI (area size, location within given Factbase)
+- Validate Time range against Factbase
+- Check how many outputs there are and handle appropriately
 
 
+Parameters
 
-Steps
-1. Clone environment in arcgis pro
-2. Add Typing as a package
-3. Create new script toolbox
-4. create the parameters as shown in the bottom image
+<!-- ![image](https://user-images.githubusercontent.com/81073205/154639979-d092f2bc-8c99-4192-b123-1166612a5ab0.png) -->
 
-
-![image](https://user-images.githubusercontent.com/81073205/154336995-c8248039-7795-4053-bd91-5e55ccc9dacd.png)
-
-![image](https://user-images.githubusercontent.com/81073205/154336954-0a7f0f62-6fe1-4579-ad14-35d2e5110071.png)
+![sen2test](https://user-images.githubusercontent.com/81073205/154641356-e1387c56-3cbd-4ecb-983e-72aec67f9ea8.png)
