@@ -9,7 +9,7 @@ This script tool serves as a simple proof of concept to demonstrate the compatib
 - User input for Area of Interest (arcpy function to get information on CRS, then get extent in that CRS and use for AOI)
    - Validate the AOI (area size, location within given Factbase)
 - Validate Time range against Factbases
-- Check how many outputs there are and handle appropriately
+- Check count and format of the outputs, and handle appropriately
 
 ## Future To-Do's
 - Dynamically load the Knowledgebases and Factbases into the drop-down lists shown in the user inferface
