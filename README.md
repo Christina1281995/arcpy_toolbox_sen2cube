@@ -6,7 +6,8 @@
 This script tool serves as a simple proof of concept to demonstrate the compatibility of the Sen2Cube EO Data Cube with ArcGIS Pro such that registered users can access the application directly from within their ArcGIS Pro desktop software.
 
 ## Current To-Do's
-- Refresh token after 5 minutes
+- Check refresh token
+  - Current code refreshes token after 200 seconds --> worked once, failed once. More investagations needed about how refresh token is handled
 - Validate the AOI (area size, location within given Factbase)
 - Validate Time range against Factbases
 
