@@ -3,7 +3,7 @@
 
 ## Proof of Concept: An ArcGIS Pro Script Toolbox for Sen2Cube
 
-This script tool serves as a simple proof of concept to demonstrate the compatibility of the Sen2Cube EO Data Cube with ArcGIS Pro such that registered users can access the application directly from within their ArcGIS Pro desktop software.
+This script tool serves as a simple proof of concept to demonstrate the compatibility of the [Sen2Cube](https://www.sen2cube.at/) EO Data Cube with ArcGIS Pro such that registered users can access the application directly from within their ArcGIS Pro desktop software.
 
 ## Current To-Do's
 - Check refresh token
