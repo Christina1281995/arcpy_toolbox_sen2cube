@@ -22,5 +22,7 @@ This script tool serves as a simple proof of concept to demonstrate the compatib
 ![sen2test](https://user-images.githubusercontent.com/81073205/154641356-e1387c56-3cbd-4ecb-983e-72aec67f9ea8.png)
 
 
-https://github.com/Christina1281995/arcpy_toolbox_sen2cube/blob/main/src/demo_sen2cube.mp4
+## Demo Video
+
+https://user-images.githubusercontent.com/81073205/154838342-a6c6def6-32ff-4a1f-952a-6ccddb73af7b.mp4
 
