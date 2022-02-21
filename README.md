@@ -15,7 +15,7 @@ This script tool serves as a simple proof of concept to demonstrate the compatib
 - Add metadata documentation to toolbox
 
 ## Future To-Do's
-- Dynamically load the Knowledgebases and Factbases into the drop-down lists shown in the user inferface
+- Dynamically load the Knowledgebases, Factbases, and Time Ranges into the drop-down lists shown in the user inferface
   - Trigger the login process before showing the value list. Get factbase list and knowledgebase list -> extract names and display in drop-down list. 
   - Alternative option: Use further tkinter box (pop-up window like the login window) -> after successful login display new pop-up window with factbase and knowledgebase options.
 - If output is "csv", add an AOI shapefile to the map as well (csv table contains no spatial information)
