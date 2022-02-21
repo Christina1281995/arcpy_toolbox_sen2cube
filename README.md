@@ -5,17 +5,6 @@
 
 This script tool serves as a simple proof of concept to demonstrate the compatibility of the [Sen2Cube](https://www.sen2cube.at/) EO Data Cube with ArcGIS Pro such that registered users can access the application directly from within their ArcGIS Pro desktop software.
 
-## Current To-Do's
-- [Christina] Check refresh token
-  - Current code refreshes token after 200 seconds --> worked once, failed once. More investagations needed about how refresh token is handled
-- [Christina] Get error message if status == "failed"
-- [Niklas] Validate the AOI (area size, location within given Factbase), create polygon of AOI and add to map
-- Validate Time range against Factbases
-- [Niklas & Christina] Lots of Testing
-- Check other Factbases (Afghanistan and Syria) and make sure they work as well
-- Add metadata documentation to toolbox
-- [Christina & Niklas] Write a nice readme document here on GitHub
-
 ## Future To-Do's
 - Dynamically load the Knowledgebases, Factbases, and Time Ranges into the drop-down lists shown in the user inferface
   - Trigger the login process before showing the value list. Get factbase list and knowledgebase list -> extract names and display in drop-down list. 
