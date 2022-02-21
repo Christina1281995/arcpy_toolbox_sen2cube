@@ -10,6 +10,9 @@ This script tool serves as a simple proof of concept to demonstrate the compatib
   - Current code refreshes token after 200 seconds --> worked once, failed once. More investagations needed about how refresh token is handled
 - Validate the AOI (area size, location within given Factbase)
 - Validate Time range against Factbases
+- Testing
+- check other Factbases and make sure works
+- Add proper metadata to toolbox
 
 ## Future To-Do's
 - Dynamically load the Knowledgebases and Factbases into the drop-down lists shown in the user inferface
