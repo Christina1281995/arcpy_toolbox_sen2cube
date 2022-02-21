@@ -8,9 +8,10 @@ This script tool serves as a simple proof of concept to demonstrate the compatib
 ## Current To-Do's
 - Check refresh token
   - Current code refreshes token after 200 seconds --> worked once, failed once. More investagations needed about how refresh token is handled
+- Get error message if status == "failed"
 - Validate the AOI (area size, location within given Factbase)
 - Validate Time range against Factbases
-- Testing
+- Lots of Testing
 - Check other Factbases (Afghanistan and Syria) and make sure they work as well
 - Add metadata documentation to toolbox
 
