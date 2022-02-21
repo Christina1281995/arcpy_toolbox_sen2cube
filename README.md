@@ -11,8 +11,8 @@ This script tool serves as a simple proof of concept to demonstrate the compatib
 - Validate the AOI (area size, location within given Factbase)
 - Validate Time range against Factbases
 - Testing
-- check other Factbases and make sure works
-- Add proper metadata to toolbox
+- Check other Factbases (Afghanistan and Syria) and make sure they work as well
+- Add metadata documentation to toolbox
 
 ## Future To-Do's
 - Dynamically load the Knowledgebases and Factbases into the drop-down lists shown in the user inferface
