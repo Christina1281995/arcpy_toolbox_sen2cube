@@ -13,12 +13,11 @@ _-----New----_
 _-----New----_ <br>
 ## Implementation <br>
 ### **Login and Session Handling** <br>
-As only registered users should be able to use the toolbox, a pop-up login window was created to fetch the user credentials with which the first session token was requested. This token is necessary to post and get requests to and from the application backend. Because the initial token is only valid for 5 minutes, it needs to be refreshed in time to keep the session alive.
+Only registered users are able to use the toolbox. Therefore, when running the tool, a pop-up login window fetches the user credentials to request the initial session token. This token is needed to create POST and GET requests to the JSON web API that interacts with the Sen2Cube backend. The initial token is only valid for 5 minutes, thus a refreshment is performed in the backbround to keep the session alive. 
 
 ### **Parameters** <br>
-- taken from toolbox UI
-- majority inserted into the inferece datamodel 
-- AOI checked for size limits and added as layer to map
+The user can and partly must set a total of 8 parameters in the toolbox UI. While the first seven will be used for creating the inference, the last one lets the user specify an output directory for the model outputs. 
+Complete list of toolbox parameters: <br>
 
 | Parameter | Format |
 |----------|------|
@@ -35,14 +34,15 @@ As only registered users should be able to use the toolbox, a pop-up login windo
 
 
 ### **Output**
-Outputs are read from the reponse after an inference has run successfully. These outputs, geotiff rasters or CSV tables, are then accessed and downloaded via a link, stored locally in the directory specified by the user and added to the current active map for direct inspection.
-
+Inference outputs can be either one or more Geotiff rasters, CSV tables or a mix of both. The outputs ar eread from the response object as soon as the inference status is switched to "SUCCESSFUL" by the system. The results are then downloaded into the user-specified target folder and additionally added to the active map in ArcGIS Pro.
 
 _-----New----_ <br>
 ## Challenges and Open Issues <br>
 A challenging issue was handling the conversion of project extent coordinates into coordinate pairs in the right coordinate reference system so that the application could read the area of interest supplied by the user. 
-...
-An open issue remains the dynamic adjusting of input parameters. While this is currently hardcoded, available fact- and knowledgebases as well as available start and end dates could be dynamically requested and offered as parameter choices. 
+... <br>
+### Open issues### <br>
+An open issue remains the dynamic adjusting of input parameters. While this is currently hardcoded, available fact- and knowledgebases as well as available start and end dates could be dynamically requested and offered as parameter choices. <br>
+Another point is handling the specification of the AOI by the user. First the area needs checking if the size is appropriate for the system by setting a maximum valid area size. Additionally, the factbases are spatially constrained, therefore it needs to be verified that the user AOI is lies within the factbase extent.
 
 _-----New----_
 
@@ -52,7 +52,7 @@ _-----New----_
   - Alternative option: Use further tkinter box (pop-up window like the login window) -> after successful login display new pop-up window with factbase and knowledgebase options.
 - If output is "csv", add an AOI shapefile to the map as well (csv table contains no spatial information)
 
-## Concept
+## Step-By-Step
 <!-- ![image](https://user-images.githubusercontent.com/81073205/154639979-d092f2bc-8c99-4192-b123-1166612a5ab0.png) -->
 
 ![sen2test](https://user-images.githubusercontent.com/81073205/154641356-e1387c56-3cbd-4ecb-983e-72aec67f9ea8.png)
