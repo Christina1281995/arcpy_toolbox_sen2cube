@@ -294,9 +294,9 @@ if __name__ == '__main__':
     if factbase_input == "1 - Austria":
         inference_body["data"]["relationships"]["factbase"]["data"]["id"] = "1"
     elif factbase_input == "2 - Afghanistan":
-        inference_body["data"]["relationships"]["factbase"]["data"]["id"] = "2"
+        inference_body["data"]["relationships"]["factbase"]["data"]["id"] = "8"
     elif factbase_input == "3 - Syria":
-        inference_body["data"]["relationships"]["factbase"]["data"]["id"] = "3"
+        inference_body["data"]["relationships"]["factbase"]["data"]["id"] = "2"
         
     # Insert Knowledgebase into Inference Body Text
     knowledgebase_input = arcpy.GetParameterAsText(2)
