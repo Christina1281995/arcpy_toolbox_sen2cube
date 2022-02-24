@@ -4,13 +4,12 @@
 # Proof of Concept: An ArcGIS Pro Script Toolbox for Sen2Cube
 This script tool serves as a simple proof of concept to demonstrate the compatibility of the [Sen2Cube](https://www.sen2cube.at/) EO Data Cube with ArcGIS Pro such that registered users can access the application directly from within their ArcGIS Pro desktop software.
 
-_-----New----_ <br>
+
 ## Project Idea <br>
 The idea behind this project is for a registered user to be able to access the Sen2Cube EO Data Cube directly from a desktop GIS via a plugin (QGIS) or a toolbox (ArcGIS Pro). For this project the toolbox version was chosen. The goal is to let the user access the application, set necessary parameters, run the query to the data cube and retrieve the information outputs directly in the GIS. This project thereby focuses on creating a first working Proof of Concept, but possible further development ideas are listed in a following section. 
 A detailed description on how the semantic EO data cube and the Sen2Cube work in detail can be found in the [Manual](https://manual.sen2cube.at/index.html). <br>
-_-----New----_
 
-_-----New----_ <br>
+
 ## Implementation <br>
 ### **Login and Session Handling** <br>
 Only registered users are able to use the toolbox. Therefore, when running the tool, a pop-up login window fetches the user credentials to request the initial session token. This token is needed to create POST and GET requests to the JSON web API that interacts with the Sen2Cube backend. The initial token is only valid for 5 minutes, thus a refreshment is performed in the backbround to keep the session alive. <br>
@@ -37,7 +36,7 @@ In the background, a POST request is used to post the created inference datamode
 ### **Output**
 Inference outputs can be either one or more Geotiff rasters, CSV tables or a mix of both. The outputs ar eread from the response object as soon as the inference status is switched to "SUCCESSFUL" by the system. The results are then downloaded into the user-specified target folder and additionally added to the active map in ArcGIS Pro.
 
-_-----New----_ <br>
+
 ## Challenges and Open Issues <br>
 ### Challenges
 A challenging issue was handling the conversion of project extent coordinates into coordinate pairs in the right coordinate reference system so that the application could read the area of interest supplied by the user. Ultimately, this was solved by creating PointGeometries from the extent corners, which were projected into the correct reference system and returnd for accessing the suitable coordinates.
@@ -46,7 +45,6 @@ A challenging issue was handling the conversion of project extent coordinates in
 An open issue remains the dynamic adjusting of input parameters. While this is currently hardcoded, available fact- and knowledgebases as well as available start and end dates could be dynamically requested and offered as parameter choices. <br>
 Another point is handling the specification of the AOI by the user. First the area needs checking if the size is appropriate for the system by setting a maximum valid area size. Additionally, the factbases are spatially constrained, therefore it needs to be verified that the user AOI is lies within the factbase extent.
 
-_-----New----_
 
 ## Future To-Do's
 This list serves as reference of ideas to extend or improve the functionalities of the toolbox: <br>
