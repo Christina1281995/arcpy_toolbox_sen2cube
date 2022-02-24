@@ -74,13 +74,14 @@ class ToolValidator:
         # Modify parameter values and properties.
         # This gets called each time a parameter is modified, before
         # standard validation.
+        
+        # Links needed for get requests
         auth_token_url = "https://auth.sen2cube.at/realms/sen2cube-at/protocol/openid-connect/token"
         auth_client_id = "iq-web-client"
-        # fb_list = 'https://api.sen2cube.at/v1/factbase?fields[factbase]=title'
         fb_list = 'https://api.sen2cube.at/v1/factbase'
         kb_list = 'https://api.sen2cube.at/v1/knowledgebase'
 
-
+        # If the Login box hasn't been checked, hide all other parameters
         if not self.params[2].value == True:
             self.params[3].enabled = False
             self.params[4].enabled = False
@@ -91,49 +92,56 @@ class ToolValidator:
             self.params[9].enabled = False
             self.params[10].enabled = False
 
+        # If login box checked, get entered parameters from user
         if self.params[2].value == True:
             username = self.params[0].value
             password = self.params[1].value
-
+            
+            # Get token with user's input
             token_text = fetch_token(username, password, auth_token_url, auth_client_id)
             if token_text:
-                # hide login parameters
+                # If login successful, hide login parameters
                 self.params[0].enabled = False
                 self.params[1].enabled = False
                 self.params[2].enabled = False
 
                 entries = []
 
-                # getting factbase list
+                # Send get request to get information on Factbases (specifically the titles)
                 headers = {'Authorization': 'Bearer {}'.format(token_text['access_token'])}
                 with requests.Session() as s:
                     s.headers.update(headers)
                     result = s.get(fb_list).json()
-
-                    for i in range(4):
+                    
+                    # Only take the titles of those factbases where Status == OK
+                    for i in range(len(result['data'])):
                         if result['data'][i]['attributes']['status'] == "OK":
                             entries.append(result['data'][i]['attributes']['title'])
-
+                    
+                    # Add titles to parameter drop-down list
                     self.params[3].filter.list = entries
+                    # Make Factbase parameter visible
                     self.params[3].enabled = True
-
+        
+        # if Factbase selected
         if self.params[3].altered:
+            
+            # Get list of Knowledgebases 
             titles = []
-            # getting knowledgebase list
+            # Send Get Request 
             headers = {'Authorization': 'Bearer {}'.format(token_text['access_token'])}
             with requests.Session() as s:
                 s.headers.update(headers)
                 result1 = s.get(kb_list).json()
-
-                length = len(result1['data'])
-
-                for j in range(length):
+                
+                # Get all titles
+                for j in range(len(result1['data'])):
                     titles.append(result1['data'][j]['attributes']['title'])
-
+                
+                # Add titles to parameter drop-down list
                 self.params[4].filter.list = titles
 
-
-
+            # Show all other parameters now
             self.params[4].enabled = True
             self.params[5].enabled = True
             self.params[6].enabled = True
@@ -143,10 +151,6 @@ class ToolValidator:
             self.params[10].enabled = True
 
             """            
-            factbase = self.params[3].value
-            for i in range(4):
-                if result['data'][i]['attributes']['title'] == factbase:
-            
             # Date Range Check
             # format in JSON e.g. 2021-01-28
             start = result['data'][i]['attributes']['dateStart']
