@@ -276,7 +276,7 @@ if __name__ == '__main__':
     
     # Insert Area of Interest into Inference Body Text
     # The get_points() function defined above handles extent projection and point conversion
-    aoi_points = get_points(arcpy.GetParameter(0))
+    aoi_points = get_points(arcpy.GetParameter(2))
     
     # BBOX coordinate order: lower-left, lower-right, upper-right, upper-left, lower-left
     aoi = "{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[" + \
@@ -290,7 +290,7 @@ if __name__ == '__main__':
     inference_body["data"]["attributes"]["owner"] = str(username)
     
     # Insert Factbase into Inference Body Text
-    factbase_input = arcpy.GetParameterAsText(1)
+    factbase_input = arcpy.GetParameterAsText(0)
     if factbase_input == "1 - Austria":
         inference_body["data"]["relationships"]["factbase"]["data"]["id"] = "1"
     elif factbase_input == "2 - Afghanistan":
@@ -299,7 +299,7 @@ if __name__ == '__main__':
         inference_body["data"]["relationships"]["factbase"]["data"]["id"] = "2"
         
     # Insert Knowledgebase into Inference Body Text
-    knowledgebase_input = arcpy.GetParameterAsText(2)
+    knowledgebase_input = arcpy.GetParameterAsText(1)
     if knowledgebase_input == "00a - Hello World I":
         inference_body["data"]["relationships"]["knowledgebase"]["data"]["id"] = "2150"
     elif knowledgebase_input == "01 - Count Water Presence":
