@@ -112,35 +112,8 @@ class ToolValidator:
                         if result['data'][i]['attributes']['status'] == "OK":
                             entries.append(result['data'][i]['attributes']['title'])
 
-
-
-
-                    # entry = result['data'][0]['type']
-
-                    #for factbase in results["data"]:
-                    #    entries.append(str(factbase["attributes"]["title"]))
-
-                    # self.params[3].value = str(entry)
                     self.params[3].filter.list = entries
                     self.params[3].enabled = True
-
-                #entries.append("1 - Austria")
-                #entries.append("2 - Afghanistan")
-                #entries.append("3 - Syria")
-                """
-                for factbase in result:
-                    #if factbase["attributes"]["status"] == "OK":
-                    if factbase["attributes"]["title"] == "Austria":
-                        entries.append("1 - Austria")
-                    if factbase["attributes"]["title"] == "Afghanistan":
-                        entries.append("2 - Afghanistan")
-                    if factbase["attributes"]["title"] == "North-Western Syria":
-                        entries.append("3 - Syria")
-                """
-
-                #self.params[3].filter.list = str(result)
-                #self.params[3].enabled = True
-
 
 
         return
