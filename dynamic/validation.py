@@ -78,6 +78,8 @@ class ToolValidator:
         auth_client_id = "iq-web-client"
         # fb_list = 'https://api.sen2cube.at/v1/factbase?fields[factbase]=title'
         fb_list = 'https://api.sen2cube.at/v1/factbase'
+        kb_list = 'https://api.sen2cube.at/v1/knowledgebase'
+
 
         if not self.params[2].value == True:
             self.params[3].enabled = False
@@ -102,7 +104,7 @@ class ToolValidator:
 
                 entries = []
 
-                # getting factbase list with all factbases
+                # getting factbase list
                 headers = {'Authorization': 'Bearer {}'.format(token_text['access_token'])}
                 with requests.Session() as s:
                     s.headers.update(headers)
@@ -114,6 +116,41 @@ class ToolValidator:
 
                     self.params[3].filter.list = entries
                     self.params[3].enabled = True
+
+        if self.params[3].altered:
+            titles = []
+            # getting knowledgebase list
+            headers = {'Authorization': 'Bearer {}'.format(token_text['access_token'])}
+            with requests.Session() as s:
+                s.headers.update(headers)
+                result1 = s.get(kb_list).json()
+
+                length = len(result1['data'])
+
+                for j in range(length):
+                    titles.append(result1['data'][j]['attributes']['title'])
+
+                self.params[4].filter.list = titles
+
+
+
+            self.params[4].enabled = True
+            self.params[5].enabled = True
+            self.params[6].enabled = True
+            self.params[7].enabled = True
+            self.params[8].enabled = True
+            self.params[9].enabled = True
+            self.params[10].enabled = True
+
+            """            
+            factbase = self.params[3].value
+            for i in range(4):
+                if result['data'][i]['attributes']['title'] == factbase:
+            
+            # Date Range Check
+            # format in JSON e.g. 2021-01-28
+            start = result['data'][i]['attributes']['dateStart']
+            end = result['data'][i]['attributes']['dateEnd']"""
 
 
         return
