@@ -8,6 +8,13 @@ This script tool serves as a simple proof of concept to demonstrate the compatib
 ## Project Idea <br>
 The idea behind this project is for a registered user to be able to access the Sen2Cube EO Data Cube directly from a desktop GIS via a plugin (QGIS) or a toolbox (ArcGIS Pro). For this project the toolbox version was chosen. The goal is to let the user access the application, set necessary parameters, run the query to the data cube and retrieve the information outputs directly in the GIS. This project thereby focuses on creating a first working Proof of Concept, but possible further development ideas are listed in a following section. 
 A detailed description on how the semantic EO data cube and the Sen2Cube work in detail can be found in the [Manual](https://manual.sen2cube.at/index.html). <br>
+<br>
+<br>
+<i><b>Here we present TWO versions of the Proof of Concept Script Tool. The first is a light-weight, speedy tool. The second is a more dynamic tool.</b></i>
+<br>
+<br>
+
+# Toolbox Version 1
 
 ## Implementation <br>
 ### **Login and Session Handling** <br>
@@ -68,9 +75,27 @@ https://user-images.githubusercontent.com/81073205/154838342-a6c6def6-32ff-4a1f-
 
 
 
-__________________________________________________________________________________________________________________________
+<br>
+<br>
 
-# Dynamic Sen2Cube Toolbox
+<hr>
+
+<br>
+<br>
+
+# Toolbox Version 2
+
+An alternative version of the toolbox implements a more dynamic script tool. This tool <b>dynamically loads information about the Sen2Cube Factbases and Knowledgebases</b> while the user is adjusting the parameters in the GUI. In addition to the user input for all parameters described above, several validation checks are included in this script tool:
+- Only factbases with the status "OK" are loaded into the drop down box for Factbases
+- Once a Factbase is selected, it is shown in the map to make the Area of Interest selection more intuitive
+- Once a Factbase is selected, the Factbase's valid time ranges are used to validate the user's selected dates
+- Once the user selects an Area of Interest (extent), the outline is shown in the map as well
+
+## Concept/ Visual Demonstration
+
+![concept3 (1)](https://user-images.githubusercontent.com/81073205/155813635-031d0808-2d2f-43b1-8cf2-24d4baf76840.png)
+
+
 
 ## Time Range
 This toolbox performs 3 validation checks on the user's entered time ranges. 
