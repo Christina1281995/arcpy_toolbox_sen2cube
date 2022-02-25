@@ -57,6 +57,8 @@ def fetch_token(username: str, password: str,
             f"Unknown error on authentication for token url {auth_token_url} as client {auth_client_id}.",
             exc_info=True, )
 
+
+
 class ToolValidator:
     # Class to add custom behavior and properties to the tool and tool parameters.
 
@@ -74,36 +76,55 @@ class ToolValidator:
         # Modify parameter values and properties.
         # This gets called each time a parameter is modified, before
         # standard validation.
-        
-        # Links needed for get requests
+
+
+
+        # --------------------------------  Links needed for get requests --------------------------------------------
         auth_token_url = "https://auth.sen2cube.at/realms/sen2cube-at/protocol/openid-connect/token"
         auth_client_id = "iq-web-client"
         fb_list = 'https://api.sen2cube.at/v1/factbase'
         kb_list = 'https://api.sen2cube.at/v1/knowledgebase'
+        # Scratch DB for temporary Layers (e.g. AOI or BBOX of Factbases)
+        db_path = arcpy.mp.ArcGISProject("CURRENT").defaultGeodatabase
+        # Current Project
+        aprx = arcpy.mp.ArcGISProject("CURRENT")
+        # Active Map
+        activeMap = arcpy.mp.ArcGISProject("CURRENT").activeMap
+        # Spatial Reference of Map
+        map_reference_code = activeMap.spatialReference.PCSCode
+        # Arcpy formatted spatial reference
+        map_spatial_reference = arcpy.SpatialReference(map_reference_code)
+
+        # -------------------------------------------  LOGIN  --------------------------------------------------------
 
         # If the Login box hasn't been checked, hide all other parameters
         if not self.params[2].value == True:
-            self.params[3].enabled = False
-            self.params[4].enabled = False
-            self.params[5].enabled = False
-            self.params[6].enabled = False
-            self.params[7].enabled = False
-            self.params[8].enabled = False
-            self.params[9].enabled = False
-            self.params[10].enabled = False
+            self.params[3].enabled = False  # Factbase
+            self.params[4].enabled = False  # Knowledgebase
+            self.params[5].enabled = False  # AOI
+            self.params[6].enabled = False  # Start Date
+            self.params[7].enabled = False  # End Date
+            self.params[8].enabled = False  # Comment
+            self.params[9].enabled = False  # Favourite
+            self.params[10].enabled = False # Output Directory
+            self.params[11].enabled = False # TEST FIELD --------------------------------------------!!
 
         # If login box checked, get entered parameters from user
         if self.params[2].value == True:
             username = self.params[0].value
             password = self.params[1].value
-            
+
+            # ---------------------------------------  GET TOKEN  ----------------------------------------------------
+
             # Get token with user's input
             token_text = fetch_token(username, password, auth_token_url, auth_client_id)
             if token_text:
                 # If login successful, hide login parameters
-                self.params[0].enabled = False
-                self.params[1].enabled = False
-                self.params[2].enabled = False
+                self.params[0].enabled = False  # Username
+                self.params[1].enabled = False  # Password
+                self.params[2].enabled = False  # Checkbox
+
+                # ------------------------------------ FILL FACTBASE VALUES  -----------------------------------------
 
                 entries = []
 
@@ -111,44 +132,252 @@ class ToolValidator:
                 headers = {'Authorization': 'Bearer {}'.format(token_text['access_token'])}
                 with requests.Session() as s:
                     s.headers.update(headers)
-                    result = s.get(fb_list).json()
-                    
+                    fb_result = s.get(fb_list).json()
+
                     # Only take the titles of those factbases where Status == OK
-                    for i in range(len(result['data'])):
-                        if result['data'][i]['attributes']['status'] == "OK":
-                            entries.append(result['data'][i]['attributes']['title'])
-                    
+                    for i in range(len(fb_result['data'])):
+                        if fb_result['data'][i]['attributes']['status'] == "OK":
+                            entries.append(fb_result['data'][i]['attributes']['title'])
+
                     # Add titles to parameter drop-down list
                     self.params[3].filter.list = entries
                     # Make Factbase parameter visible
                     self.params[3].enabled = True
-        
-        # if Factbase selected
+
+        # ------------------------------------ FILL KNOWLEDGEBASE VALUES  -----------------------------------------
+
+        # If a Factbase is selected
         if self.params[3].altered:
-            
-            # Get list of Knowledgebases 
+
+            # Get list of Knowledgebases
             titles = []
-            # Send Get Request 
+            # Send Get Request
             headers = {'Authorization': 'Bearer {}'.format(token_text['access_token'])}
             with requests.Session() as s:
                 s.headers.update(headers)
-                result1 = s.get(kb_list).json()
-                
+                kb_result = s.get(kb_list).json()
+
                 # Get all titles
-                for j in range(len(result1['data'])):
-                    titles.append(result1['data'][j]['attributes']['title'])
-                
+                for j in range(len(kb_result['data'])):
+                    titles.append(kb_result['data'][j]['attributes']['title'])
+
                 # Add titles to parameter drop-down list
                 self.params[4].filter.list = titles
 
             # Show all other parameters now
-            self.params[4].enabled = True
-            self.params[5].enabled = True
-            self.params[6].enabled = True
-            self.params[7].enabled = True
-            self.params[8].enabled = True
-            self.params[9].enabled = True
-            self.params[10].enabled = True
+            self.params[4].enabled = True  # Knowledgebase
+            self.params[5].enabled = True  # AOI
+            self.params[6].enabled = True   # Start Date
+            self.params[7].enabled = True   # End Date
+            self.params[8].enabled = True   # Comment
+            self.params[9].enabled = True   # Favourite
+            self.params[10].enabled = True  # Output Directory
+            self.params[11].enabled = True  # TEST FIELD ------------------------------------------------------
+
+            # ----------------------------- SHOW FACTBASE FOOTPRINT IN MAP -----------------------------------------
+
+            selected_fb = self.params[3].value
+
+            # File Name and Path to Scratch DB
+            fp_line_path = os.path.join(str(db_path), "temp")
+
+            # Handle Whitespace in name for Syria
+            if str(selected_fb) == "North-Western Syria":
+                name = "Syria_Factbase_Footprint"
+            else:
+                name = f"{str(selected_fb)}_Factbase_Footprint"
+
+            fp_poly_path = os.path.join(str(db_path), name)
+
+            # If the selected Factbase Footprint already exists - pass
+            if arcpy.Exists(fp_poly_path):
+                pass
+            else:
+                check_syria = os.path.join(str(db_path), "Syria_Factbase_Footprint")
+                check_austria = os.path.join(str(db_path), "Austria_Factbase_Footprint")
+                check_afghanistan = os.path.join(str(db_path), "Afghanistan_Factbase_Footprint")
+                check_semantix = os.path.join(str(db_path), "Semantix_Factbase_Footprint")
+
+                # Delete any other Factbase Footprint
+                if str(selected_fb) == "Austria":
+                    if arcpy.Exists(check_semantix):
+                        arcpy.Delete_management(check_semantix)
+                    if arcpy.Exists(check_syria):
+                        arcpy.Delete_management(check_syria)
+                    if arcpy.Exists(check_afghanistan):
+                        arcpy.Delete_management(check_afghanistan)
+
+                elif str(selected_fb) == "North-Western Syria":
+                    if arcpy.Exists(check_semantix):
+                        arcpy.Delete_management(check_semantix)
+                    if arcpy.Exists(check_austria):
+                        arcpy.Delete_management(check_austria)
+                    if arcpy.Exists(check_afghanistan):
+                        arcpy.Delete_management(check_afghanistan)
+
+                elif str(selected_fb) == "Afghanistan":
+                    if arcpy.Exists(check_semantix):
+                        arcpy.Delete_management(check_semantix)
+                    if arcpy.Exists(check_syria):
+                        arcpy.Delete_management(check_syria)
+                    if arcpy.Exists(check_austria):
+                        arcpy.Delete_management(check_austria)
+
+                elif str(selected_fb) == "SemantiX":
+                    if arcpy.Exists(check_austria):
+                        arcpy.Delete_management(check_austria)
+                    if arcpy.Exists(check_semantix):
+                        arcpy.Delete_management(check_syria)
+                    if arcpy.Exists(check_semantix):
+                        arcpy.Delete_management(check_afghanistan)
+
+
+                for i in range(len(fb_result['data'])):
+                    if fb_result['data'][i]['attributes']['title'] == str(selected_fb):
+                        # Get Footprint of Factbase
+                        footprint = fb_result['data'][i]['attributes']['footprint']['features'][0]['geometry'][
+                            'coordinates']
+
+                reproj_points2 = []
+                footprint_array = arcpy.Array()
+
+                if str(selected_fb) == "Austria":
+                    for point in footprint[1][0]:
+                        # Create arcpy.Points and add to Array
+                        footprint_array.append(arcpy.Point(point[0], point[1]))
+
+                elif str(selected_fb) == "North-Western Syria":
+                    for point in footprint[0][0]:
+                        # Create arcpy.Points and add to Array
+                        footprint_array.append(arcpy.Point(point[0], point[1]))
+
+                elif str(selected_fb) == "Afghanistan":
+                    for point in footprint[0][0]:
+                        # Create arcpy.Points and add to Array
+                        footprint_array.append(arcpy.Point(float(point[0]), float(point[1])))
+
+                elif str(selected_fb) == "SemantiX":
+                    for point in footprint[0]:
+                        # Create arcpy.Points and add to Array
+                        footprint_array.append(arcpy.Point(point[0], point[1]))
+
+
+                for point in footprint_array:
+                    pnt_geometry = arcpy.PointGeometry(point, map_spatial_reference)
+                    projectedPointGeometry = pnt_geometry.projectAs(arcpy.SpatialReference(4326))
+                    reproj_points2.append(projectedPointGeometry)
+
+                # Points to Line
+                arcpy.PointsToLine_management(reproj_points2, fp_line_path)
+                # Line to Polygon
+                arcpy.management.FeatureToPolygon(fp_line_path, fp_poly_path)
+                # Add to Map
+                activeMap.addDataFromPath(fp_poly_path)
+
+                layers = activeMap.listLayers()
+                for layer in layers:
+                    if layer.name == name:
+                        if layer.supports("TRANSPARENCY"):
+                            layer.transparency = 60
+
+
+        # ------------------------------------ SHOW SELECTED AOI IN MAP -----------------------------------------
+
+        # If AOI Extent altered, check if the extent is new or has changed and display on map
+        if self.params[5].altered:
+
+            # "createNewAOI" is used to check if there is already an AOI shown, and if the extent has changed
+            global createNewAOI
+            createNewAOI = "yes"
+
+            # Get Input Extent and split into its individual units
+            individual_units = str(self.params[5].value).split()
+
+            # File Name and Path to Scratch DB
+            filename = "Your_AOI"
+            layer_path = os.path.join(str(db_path), filename)
+
+            # If a "Your_AOI" already exists, check if extent is same, else delete and replace
+            if arcpy.Exists(layer_path):
+
+                # Get Current Extent
+                filenameNew = "YourAOI"
+                layer_pathNew = os.path.join(str(db_path), filenameNew)
+                points1 = []
+                reproj_points1 = []
+
+                # Remove commas if present and only use first 4 since those are the coordinates for BBOX
+                for i in range(4):
+                    points1.append(individual_units[i].replace(",", "."))
+
+                # Create arcpy.Points and add to Array
+                pointsArray = arcpy.Array([arcpy.Point(float(points1[0]), float(points1[1])),
+                                           arcpy.Point(float(points1[2]), float(points1[1])),
+                                           arcpy.Point(float(points1[2]), float(points1[3])),
+                                           arcpy.Point(float(points1[0]), float(points1[3])),
+                                           arcpy.Point(float(points1[0]), float(points1[1]))])
+
+                for point in pointsArray:
+                    pnt_geometry = arcpy.PointGeometry(point, map_spatial_reference)
+                    projectedPointGeometry = pnt_geometry.projectAs(arcpy.SpatialReference(4326))
+                    reproj_points1.append(projectedPointGeometry)
+
+                # Points to Line
+                arcpy.PointsToLine_management(reproj_points1, layer_pathNew)
+
+                # Describe the new Extent and the old Extent
+                desc = arcpy.Describe(layer_pathNew)
+                desc1 = arcpy.Describe(layer_path)
+                extent = [desc.extent.XMin, desc.extent.XMax, desc.extent.YMin, desc.extent.YMax]
+                extent1 = [desc1.extent.XMin, desc1.extent.XMax, desc1.extent.YMin, desc1.extent.YMax]
+
+                # Check if the extents are the same
+                if extent == extent1:
+                    # If same, no need to replace the AOI
+                    createNewAOI = "no"
+                # If not the same, delete old one and create new one
+                else:
+                    arcpy.Delete_management(layer_path)
+                    createNewAOI = "yes"
+
+                # Delete temporary extent layer in any case (was only for comparison)
+                arcpy.Delete_management(layer_pathNew)
+
+            if createNewAOI == "yes":
+                points = []
+                reproj_points = []
+
+                # Remove commas if present and only use first 4 since those are the coordinates for BBOX
+                for i in range(4):
+                    points.append(individual_units[i].replace(",","."))
+
+                # Create arcpy.Points and add to Array
+                pointsArray = arcpy.Array([arcpy.Point(float(points[0]), float(points[1])),
+                    arcpy.Point(float(points[2]), float(points[1])),
+                    arcpy.Point(float(points[2]), float(points[3])),
+                    arcpy.Point(float(points[0]), float(points[3])),
+                    arcpy.Point(float(points[0]), float(points[1]))])
+
+                for point in pointsArray:
+                    pnt_geometry = arcpy.PointGeometry(point, map_spatial_reference)
+                    projectedPointGeometry = pnt_geometry.projectAs(arcpy.SpatialReference(4326))
+                    reproj_points.append(projectedPointGeometry)
+
+                # Points to Line
+                arcpy.PointsToLine_management(reproj_points, layer_path)
+
+                # Add to Map
+                activeMap.addDataFromPath(layer_path)
+
+                #layers = activeMap.listLayers()
+                #for layer in layers:
+                    #if layer.name == "Your_AOI":
+                        # layer.symbology.renderer.symbol.outlineColor = {'RGB' : [255, 0, 0, 60]}
+                        #layer.symbology.renderer.symbol.applySymbolFromGallery("1.0 Point")
+
+
+
+
 
             """            
             # Date Range Check
