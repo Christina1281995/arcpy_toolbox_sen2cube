@@ -91,7 +91,19 @@ An alternative version of the toolbox implements a more dynamic script tool. Thi
 - Once a Factbase is selected, the Factbase's valid time ranges are used to validate the user's selected dates
 - Once the user selects an Area of Interest (extent), the outline is shown in the map as well
 
-## Concept/ Visual Demonstration
+### To Install and Use
+Simply download the [ProofofConcept.atbx](https://github.com/Christina1281995/arcpy_toolbox_sen2cube/raw/main/dynamic/Proof%20of%20Concept.atbx) and then add it to your ArcGIS Project as shown below:
+
+<br>
+
+<img src="https://user-images.githubusercontent.com/81073205/155815217-aa0b22f6-822a-4f99-a693-b838ab87f63e.png" width="80%">
+<br>
+
+
+
+## This is How the Tool Works
+
+<br>
 
 ![concept3 (1)](https://user-images.githubusercontent.com/81073205/155813635-031d0808-2d2f-43b1-8cf2-24d4baf76840.png)
 
