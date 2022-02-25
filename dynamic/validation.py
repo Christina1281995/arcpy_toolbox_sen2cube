@@ -127,7 +127,6 @@ class ToolValidator:
             self.params[8].enabled = False  # Comment
             self.params[9].enabled = False  # Favourite
             self.params[10].enabled = False # Output Directory
-            self.params[11].enabled = False # TEST FIELD --------------------------------------------!!
 
         # If login box checked, get entered parameters from user
         if self.params[2].value == True:
@@ -196,7 +195,6 @@ class ToolValidator:
             self.params[8].enabled = True   # Comment
             self.params[9].enabled = True   # Favourite
             self.params[10].enabled = True  # Output Directory
-            self.params[11].enabled = True  # TEST FIELD ------------------------------------------------------
 
             # Chosen Factbase
             selected_fb = self.params[3].value
@@ -301,15 +299,12 @@ class ToolValidator:
                 # Add to Map
                 activeMap.addDataFromPath(fp_poly_path)
 
-
-
                 layers = activeMap.listLayers()
                 for layer in layers:
                     if layer.name == name:
                         if layer.supports("TRANSPARENCY"):
                             layer.transparency = 60
 
-        # ----------------------------- GET VALID TIME RANGES FROM FACTBASE -----------------------------------------
 
         # ------------------------------------ SHOW SELECTED AOI IN MAP -----------------------------------------
 
@@ -399,11 +394,6 @@ class ToolValidator:
                 # Add to Map
                 activeMap.addDataFromPath(layer_path)
 
-                #layers = activeMap.listLayers()
-                #for layer in layers:
-                    #if layer.name == "Your_AOI":
-                        # layer.symbology.renderer.symbol.outlineColor = {'RGB' : [255, 0, 0, 60]}
-                        #layer.symbology.renderer.symbol.applySymbolFromGallery("1.0 Point")
 
             return
 
@@ -423,13 +413,13 @@ class ToolValidator:
         global allowed_end
 
         selected_fb = self.params[3].value
-        
+
         # ------------------------------------ CHECKS FOR DATE RANGE -----------------------------------------
 
         # Date format in JSON: 2021-01-28
         # Date format from user input: 2022-02-02 20:09:08
-        
-        # Start Date 
+
+        # Start Date
         if self.params[6].altered:
             length = len(fb_result['data'])
             for i in range(length):
@@ -464,13 +454,38 @@ class ToolValidator:
                     # If the entered date is either before or after the factbase's valid range, set Error Message
                     if allowed_end < end or end < allowed_start:
                         self.params[7].setErrorMessage(f"\nInvalid End Date.\n\nThe valid date range for this Factbase is {str(allowed_start.strftime('%Y-%m-%d'))} to {str(allowed_end.strftime('%Y-%m-%d'))}. Please adjust the date.")
-                    
+
                     # If the entered end date is before the entered start date
                     if start:
                         if end < start:
                             self.params[7].setErrorMessage(
                                 "The selected end date is before the selected start date. Please change the dates.")
 
+        # Check AOI is within Factbase
+        """
+        if self.params[5].altered:
+
+            # Get AOI
+            db_path = arcpy.mp.ArcGISProject("CURRENT").defaultGeodatabase
+            check_aoi = os.path.join(str(db_path), "Your_AOI")
+
+            # Get Factbase
+            if selected_fb == "Austria":
+                check_fb = os.path.join(str(db_path), "Austria_Factbase_Footprint")
+            if selected_fb == "Afghanistan":
+                check_fb = os.path.join(str(db_path), "Afghanistan_Factbase_Footprint")
+            if selected_fb == "SemantiX":
+                check_fb = os.path.join(str(db_path), "Semantix_Factbase_Footprint")
+            if selected_fb == "North-Western Syria":
+                check_fb = os.path.join(str(db_path), "Syria_Factbase_Footprint")
+
+            if check_fb[0].overlaps(check_aoi) == True: # and check_fb.contains(check_aoi) == False:
+                #self.params[5].setErrorMessage(check_fb)
+                self.params[5].setWarningMessage("The given Area of Interest (extent) is not completely within the factbase's footprint. This means some parts of the Area of Interest will not be processed.")
+
+            elif check_fb.overlaps(check_aoi) == False:
+                self.params[5].setErrorMessage("The given Area of Interest (extent) is not within the factbase's footprint.")
+        """
         return
 
     # def isLicensed(self):
