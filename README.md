@@ -66,3 +66,20 @@ This list serves as reference of ideas to extend or improve the functionalities 
 
 https://user-images.githubusercontent.com/81073205/154838342-a6c6def6-32ff-4a1f-952a-6ccddb73af7b.mp4
 
+
+
+__________________________________________________________________________________________________________________________
+
+# Dynamic Sen2Cube Toolbox
+
+## Time Range
+This toolbox performs 3 validation checks on the user's entered time ranges. 
+1. If the entered start date is either before or after the selected factbase's valid time range an Error Message is returned to the user immediately asking them to adjust this input.
+2. If the entered end date is either before or after the selected factbase's valid time range an Error Message is returned to the user immediately asking them to adjust this input.
+3. If the entered end date is before the entered start date an Error Message is returned to the user immediately asking them to adjust this input.
+
+![error2](https://user-images.githubusercontent.com/81073205/155802656-2a8355ba-f91b-44c3-bbc3-ba9e05608780.png)
+
+![error1](https://user-images.githubusercontent.com/81073205/155802258-7eb4a18a-bd47-41e8-8fdb-648593954408.png)
+
+
