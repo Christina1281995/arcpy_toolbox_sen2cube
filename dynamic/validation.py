@@ -18,7 +18,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from PIL import Image, ImageTk
 from io import BytesIO
-from datetime import datetime
+from datetime import datetime, date
 from oauthlib.oauth2 import InvalidGrantError, LegacyApplicationClient, OAuth2Token, \
     UnauthorizedClientError
 from requests import Response
@@ -57,14 +57,32 @@ def fetch_token(username: str, password: str,
             f"Unknown error on authentication for token url {auth_token_url} as client {auth_client_id}.",
             exc_info=True, )
 
+def get_fb(token_text):
+
+    fb_list = 'https://api.sen2cube.at/v1/factbase'
+    headers = {'Authorization': 'Bearer {}'.format(token_text['access_token'])}
+    with requests.Session() as s:
+        s.headers.update(headers)
+        fb_result = s.get(fb_list).json()
+
+    return fb_result
 
 
 class ToolValidator:
     # Class to add custom behavior and properties to the tool and tool parameters.
+    global fb_result
 
     def __init__(self):
         # set self.params for use in other function
         self.params = arcpy.GetParameterInfo()
+
+        # Set map projection such that footprints show up
+        wgs84 = arcpy.SpatialReference(4326)
+        activeMap = arcpy.mp.ArcGISProject("CURRENT").activeMap
+        map_reference_code = activeMap.spatialReference.PCSCode
+        original = arcpy.SpatialReference(map_reference_code)
+        if not activeMap.spatialReference == wgs84:
+            activeMap.spatialReference = wgs84
 
     def initializeParameters(self):
         # Customize parameter properties.
@@ -77,12 +95,11 @@ class ToolValidator:
         # This gets called each time a parameter is modified, before
         # standard validation.
 
-
-
         # --------------------------------  Links needed for get requests --------------------------------------------
+
         auth_token_url = "https://auth.sen2cube.at/realms/sen2cube-at/protocol/openid-connect/token"
         auth_client_id = "iq-web-client"
-        fb_list = 'https://api.sen2cube.at/v1/factbase'
+        # fb_list = 'https://api.sen2cube.at/v1/factbase'
         kb_list = 'https://api.sen2cube.at/v1/knowledgebase'
         # Scratch DB for temporary Layers (e.g. AOI or BBOX of Factbases)
         db_path = arcpy.mp.ArcGISProject("CURRENT").defaultGeodatabase
@@ -94,6 +111,9 @@ class ToolValidator:
         map_reference_code = activeMap.spatialReference.PCSCode
         # Arcpy formatted spatial reference
         map_spatial_reference = arcpy.SpatialReference(map_reference_code)
+
+        global fb_result
+        global selected_fb
 
         # -------------------------------------------  LOGIN  --------------------------------------------------------
 
@@ -128,21 +148,25 @@ class ToolValidator:
 
                 entries = []
 
+                """
                 # Send get request to get information on Factbases (specifically the titles)
                 headers = {'Authorization': 'Bearer {}'.format(token_text['access_token'])}
                 with requests.Session() as s:
                     s.headers.update(headers)
                     fb_result = s.get(fb_list).json()
+                """
 
-                    # Only take the titles of those factbases where Status == OK
-                    for i in range(len(fb_result['data'])):
-                        if fb_result['data'][i]['attributes']['status'] == "OK":
-                            entries.append(fb_result['data'][i]['attributes']['title'])
+                fb_result = get_fb(token_text)
 
-                    # Add titles to parameter drop-down list
-                    self.params[3].filter.list = entries
-                    # Make Factbase parameter visible
-                    self.params[3].enabled = True
+                # Only take the titles of those factbases where Status == OK
+                for i in range(len(fb_result['data'])):
+                    if fb_result['data'][i]['attributes']['status'] == "OK":
+                        entries.append(fb_result['data'][i]['attributes']['title'])
+
+                # Add titles to parameter drop-down list
+                self.params[3].filter.list = entries
+                # Make Factbase parameter visible
+                self.params[3].enabled = True
 
         # ------------------------------------ FILL KNOWLEDGEBASE VALUES  -----------------------------------------
 
@@ -174,9 +198,10 @@ class ToolValidator:
             self.params[10].enabled = True  # Output Directory
             self.params[11].enabled = True  # TEST FIELD ------------------------------------------------------
 
-            # ----------------------------- SHOW FACTBASE FOOTPRINT IN MAP -----------------------------------------
-
+            # Chosen Factbase
             selected_fb = self.params[3].value
+
+            # ----------------------------- SHOW FACTBASE FOOTPRINT IN MAP -----------------------------------------
 
             # File Name and Path to Scratch DB
             fp_line_path = os.path.join(str(db_path), "temp")
@@ -226,9 +251,9 @@ class ToolValidator:
                 elif str(selected_fb) == "SemantiX":
                     if arcpy.Exists(check_austria):
                         arcpy.Delete_management(check_austria)
-                    if arcpy.Exists(check_semantix):
+                    if arcpy.Exists(check_syria):
                         arcpy.Delete_management(check_syria)
-                    if arcpy.Exists(check_semantix):
+                    if arcpy.Exists(check_afghanistan):
                         arcpy.Delete_management(check_afghanistan)
 
 
@@ -271,8 +296,12 @@ class ToolValidator:
                 arcpy.PointsToLine_management(reproj_points2, fp_line_path)
                 # Line to Polygon
                 arcpy.management.FeatureToPolygon(fp_line_path, fp_poly_path)
+                # Delete temp layer
+                arcpy.Delete_management(fp_line_path)
                 # Add to Map
                 activeMap.addDataFromPath(fp_poly_path)
+
+
 
                 layers = activeMap.listLayers()
                 for layer in layers:
@@ -280,6 +309,7 @@ class ToolValidator:
                         if layer.supports("TRANSPARENCY"):
                             layer.transparency = 60
 
+        # ----------------------------- GET VALID TIME RANGES FROM FACTBASE -----------------------------------------
 
         # ------------------------------------ SHOW SELECTED AOI IN MAP -----------------------------------------
 
@@ -287,7 +317,7 @@ class ToolValidator:
         if self.params[5].altered:
 
             # "createNewAOI" is used to check if there is already an AOI shown, and if the extent has changed
-            global createNewAOI
+            global createNewAOI, allowed_start
             createNewAOI = "yes"
 
             # Get Input Extent and split into its individual units
@@ -375,22 +405,72 @@ class ToolValidator:
                         # layer.symbology.renderer.symbol.outlineColor = {'RGB' : [255, 0, 0, 60]}
                         #layer.symbology.renderer.symbol.applySymbolFromGallery("1.0 Point")
 
-
-
-
-
-            """            
-            # Date Range Check
-            # format in JSON e.g. 2021-01-28
-            start = result['data'][i]['attributes']['dateStart']
-            end = result['data'][i]['attributes']['dateEnd']"""
-
-
-        return
+            return
 
     def updateMessages(self):
         # Customize messages for the parameters.
         # This gets called after standard validation.
+
+        auth_token_url = "https://auth.sen2cube.at/realms/sen2cube-at/protocol/openid-connect/token"
+        auth_client_id = "iq-web-client"
+        username = self.params[0].value
+        password = self.params[1].value
+        token_text = fetch_token(username, password, auth_token_url, auth_client_id)
+
+        fb_result = get_fb(token_text)
+
+        global allowed_start
+        global allowed_end
+
+        selected_fb = self.params[3].value
+        
+        # ------------------------------------ CHECKS FOR DATE RANGE -----------------------------------------
+
+        # Date format in JSON: 2021-01-28
+        # Date format from user input: 2022-02-02 20:09:08
+        
+        # Start Date 
+        if self.params[6].altered:
+            length = len(fb_result['data'])
+            for i in range(length):
+                if fb_result['data'][i]['attributes']['title'] == str(selected_fb):
+                    # Get valid date range from factbase
+                    fb_start = fb_result['data'][i]['attributes']['dateStart']
+                    allowed_start = datetime.strptime(fb_start, "%Y-%m-%d")
+                    fb_end = fb_result['data'][i]['attributes']['dateEnd']
+                    allowed_end = datetime.strptime(fb_end, "%Y-%m-%d")
+                    # Get user input
+                    input_start = str(self.params[6].value)
+                    start = datetime.strptime(input_start, "%Y-%m-%d %H:%M:%S")
+                    # If the entered date is either before or after the factbase's valid range, set Error Message
+                    if start < allowed_start or allowed_end < start:
+                        self.params[6].setErrorMessage(f"\nInvalid Start Date.\n\nThe valid date range for this Factbase is {str(allowed_start.strftime('%Y-%m-%d'))} to {str(allowed_end.strftime('%Y-%m-%d'))}. Please adjust the date.")
+
+        # End Date
+        if self.params[7].altered:
+            length = len(fb_result['data'])
+            for i in range(length):
+                if fb_result['data'][i]['attributes']['title'] == str(selected_fb):
+                    # Get valid date range from factbase
+                    fb_start = fb_result['data'][i]['attributes']['dateStart']
+                    allowed_start = datetime.strptime(fb_start, "%Y-%m-%d")
+                    fb_end = fb_result['data'][i]['attributes']['dateEnd']
+                    allowed_end = datetime.strptime(fb_end, "%Y-%m-%d")
+                    # Get user input
+                    input_end = str(self.params[7].value)
+                    end = datetime.strptime(input_end, "%Y-%m-%d %H:%M:%S")
+                    input_start = str(self.params[6].value)
+                    start = datetime.strptime(input_start, "%Y-%m-%d %H:%M:%S")
+                    # If the entered date is either before or after the factbase's valid range, set Error Message
+                    if allowed_end < end or end < allowed_start:
+                        self.params[7].setErrorMessage(f"\nInvalid End Date.\n\nThe valid date range for this Factbase is {str(allowed_start.strftime('%Y-%m-%d'))} to {str(allowed_end.strftime('%Y-%m-%d'))}. Please adjust the date.")
+                    
+                    # If the entered end date is before the entered start date
+                    if start:
+                        if end < start:
+                            self.params[7].setErrorMessage(
+                                "The selected end date is before the selected start date. Please change the dates.")
+
         return
 
     # def isLicensed(self):
