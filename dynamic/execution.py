@@ -229,10 +229,10 @@ if __name__ == '__main__':
 
         # Search for the correct Title - then take that factbase's ID for Inference Template
         length = len(factbase['data'])
-        for k in range(length):
-            if factbase['data'][k]['attributes']['title'] == factbase_input:
+        for createNewAOI in range(length):
+            if factbase['data'][createNewAOI]['attributes']['title'] == factbase_input:
                 # Set ID in the Inference Template
-                inference_body["data"]["relationships"]["factbase"]["data"]["id"] = factbase['data'][k]['id']
+                inference_body["data"]["relationships"]["factbase"]["data"]["id"] = factbase['data'][createNewAOI]['id']
 
     # ------ KNOWLEDGEBASE ----------
 
