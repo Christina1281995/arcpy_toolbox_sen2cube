@@ -15,7 +15,7 @@ A detailed description on how the semantic EO data cube and the Sen2Cube work in
 
 
 ## Installation in ArcGIS Pro
-Simply download the [Proof of Concept.atbx](https://github.com/Christina1281995/arcpy_toolbox_sen2cube/raw/main/Proof%20of%20Concept.atbx) and then add it to your ArcGIS Project as shown below. This toolbox was create for ArcGIS Pro 2.9.
+Simply download the [Proof of Concept.atbx](https://github.com/Christina1281995/arcpy_toolbox_sen2cube/raw/main/Proof%20of%20Concept.atbx) and then add it to your ArcGIS Project as shown below. This toolbox was created for ArcGIS Pro 2.9.
 
 <br>
 
@@ -46,6 +46,14 @@ Complete list of toolbox parameters: <br>
 |  7  |Save as Favourite in Sen2Cube Account | Boolean |
 |  8  |Output Directory* | Folder |
 
+After clicking "Run" these further parameters are required from the user in a pop-up window:
+
+
+| Nr. | Parameter | Format |
+|-----|----------|------|
+|  9  | Username* | String |
+|  10  | Password* | Hidden String |
+
 <i> * Required Parameters </i>
 
 ### **Login and Session Handling** <br>
@@ -70,24 +78,32 @@ In addition to the outputs added to the map, the toolbox dynamically creates a p
 
 
 <br>
-<br>
-
 <hr>
-
 <br>
 <br>
+<br>
 
-## Script Tool 2 (Dynamic)
+# Script Tool 2 (Dynamic)
 
-The second version of the script tool implements a more dynamic functionality. <b>In contrast to the first version, which only establishes a connection with Sen2Cube when the user has already set the parameters and clicks "run", this version creates the connection to Sen2Cube at the beginning and then validates the user's parameter inputs on the fly.</b>
+The second version of the script tool implements a more dynamic functionality. It is based on the first tool and implements much of the same functions. It also uses the same parameters. <b>In contrast to the first version, which only establishes a connection with Sen2Cube when the user has already set the parameters and clicks "run", this version creates the connection to Sen2Cube at the beginning and then validates the user's parameter inputs on the fly.</b>
 
-This tool dynamically loads information about the Sen2Cube Factbases and Knowledgebases while the user is adjusting the parameters in the GUI. Some details are listed here:
-- Only factbases with the status "OK" are loaded into the drop down box for Factbases
-- Once a Factbase is selected, it is shown in the map to make the Area of Interest selection more intuitive
-- Once a Factbase is selected, the Factbase's valid time ranges are used to validate the user's selected dates
-- Once the user selects an Area of Interest (extent), the outline is shown in the map as well
+- Only factbases with the <b>status "OK"</b> are loaded into the drop down box for Factbases
+- Once a Factbase is selected, it is <b>shown in the map</b> to make the Area of Interest selection more intuitive
+- Once a Factbase is selected, the Factbase's <b>valid time ranges</b> are used to validate the user's selected dates
+  - If the entered start date is either before or after the selected factbase's valid time range an Error Message is returned to the user immediately asking them to adjust this input
+  - If the entered end date is either before or after the selected factbase's valid time range an Error Message is returned to the user immediately asking them to adjust this input
+  - If the entered end date is before the entered start date an Error Message is returned to the user immediately asking them to adjust this input
+- Once the user selects an Area of Interest (extent), the outline is <b>shown in the map</b> as well
 
+<br>
 
+An example of these error messages is shown here:
+
+![error2](https://user-images.githubusercontent.com/81073205/155802656-2a8355ba-f91b-44c3-bbc3-ba9e05608780.png)
+
+![error1](https://user-images.githubusercontent.com/81073205/155802258-7eb4a18a-bd47-41e8-8fdb-648593954408.png)
+
+<br>
 
 ## Script Tool 2 (Dynamic) Visual Concept
 
@@ -97,32 +113,22 @@ This tool dynamically loads information about the Sen2Cube Factbases and Knowled
 
 
 
-### Time Range
-This toolbox performs 3 validation checks on the user's entered time ranges. 
-1. If the entered start date is either before or after the selected factbase's valid time range an Error Message is returned to the user immediately asking them to adjust this input.
-2. If the entered end date is either before or after the selected factbase's valid time range an Error Message is returned to the user immediately asking them to adjust this input.
-3. If the entered end date is before the entered start date an Error Message is returned to the user immediately asking them to adjust this input.
+## Challenges 
+<br>
 
-![error2](https://user-images.githubusercontent.com/81073205/155802656-2a8355ba-f91b-44c3-bbc3-ba9e05608780.png)
+<b>Projections (relevant to the AOI and map outputs):</b> The default map projection in ArcGIS Pro is the Web Mercator (EPSG: 3857). This means that any given spatial extent for the AOI is, by default, passed to the script tool in the unit "meters" rather than decimal degrees or degrees-minutes-seconds. The Sen2Cube backend expects to receive the AOI in the WGS84 (EPSG: 4326) projection in decimal degrees. To resolve this the following functions were implemented:
 
-![error1](https://user-images.githubusercontent.com/81073205/155802258-7eb4a18a-bd47-41e8-8fdb-648593954408.png)
+- <i>In script tool 1</i>: The tool read the extent and the map's current CRS. It then converts the given extent into ARcGIS point objects and <b>reprojects</b> them from the given CRS into the WGS84 CRS. This way the map displayed in the project can stay in the CRS chosen by the user. 
+- <i>In script tool 2</i>: This tool loads several intermediate objects into the map (the footprint of the factbases and the selected AOI) as well as the final results. Since the factbase footprints are in WGS84 and reprojecting them into the Web Mercator format proved difficult, this tool <b>changes the map's CRS to WGS84 </b>when the tool is opened. Upon completion the CRS of the map can, of course, be changed back into any other CRS and will still contain all of the tools output products. 
 
-## Challenges and Open Issues <br>
-### Challenges
-A major challenge was to let the user specify the AOI extent in a way the spatial information could be transformed to input for Sen2Cube. The final implementation resulted in the user setting the current map extent as are of interest.A challenging issue thereby was handling the conversion of project extent coordinates into coordinate pairs in the right coordinate reference system so that the application could read the area of interest supplied by the user. Ultimately, this was solved by creating a function that created PointGeometries from the extent corners, which were projected into the correct reference system and returnd for accessing the suitable coordinates.
-... <br>
-### Open issues<br>
-An open issue remains the dynamic adjusting of input parameters. While this is currently hardcoded, available fact- and knowledgebases as well as available start and end dates could be dynamically requested and offered as parameter choices. <br>
-Another point is handling the specification of the AOI by the user. First the area needs checking if the size is appropriate for the system by setting a maximum valid area size. Additionally, the factbases are spatially constrained, therefore it needs to be verified that the user AOI is lies within the factbase extent.
 
 ## Future To-Do's
-This list serves as reference of ideas to extend or improve the functionalities of the toolbox: <br>
-- Drop-down lists for parameters (Knowledgebases, Factbases, Time Ranges) should be filled dynamically with available options requestes from the backend
-  - Requires triggering the login process when accessing the parameter lists, look into the ToolValidator class in the ArcGIS Pro toolbox to custamize this behavior
-  - Alternative: Using additional tkinter box (like login pop-up window), first login, then pop-up windows for knowledgebases and factbases
-- When the output is a CSV file, the AOI should be converted to a polygon and added to the map as spatial reference (csv table contains no spatial information)
-- Handing the user more descriptive error messages from the backend
-- Transferring the logic of the entire toolbox into a QGIS Plugin using the respective plugin creator for a free software solution
+- Allowing a more diverse input for the AOI. Currently the tool only accepts an extent. In the future, this should be expanded for more complex shapes.
+- The default option of the AOI needs to be handled.
+- Implement an area check on the entered AOI, i.e. with a maximum allowed size to avoid a user time-out after 600 seconds.
+- Check if the AOI lies within the factbase's footprint on the fly and return an error message if not.
+- Handing the user more descriptive error messages from the backend.
+- Transferring the logic of the entire toolbox into a QGIS Plugin using the respective plugin creator for a free software solution.
 
 
 
