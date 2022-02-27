@@ -93,7 +93,7 @@ This tool dynamically loads information about the Sen2Cube Factbases and Knowled
 
 <br>
 
-![concept3 (1)](https://user-images.githubusercontent.com/81073205/155813635-031d0808-2d2f-43b1-8cf2-24d4baf76840.png)
+![concept4](https://user-images.githubusercontent.com/81073205/155880565-bd09f978-2ec0-4140-9f1d-57cafa7651e3.png)
 
 
 
