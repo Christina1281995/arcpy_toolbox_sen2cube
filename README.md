@@ -118,7 +118,7 @@ An example of these error messages is shown here:
 
 <b>Projections (relevant to the AOI and map outputs):</b> The default map projection in ArcGIS Pro is the Web Mercator (EPSG: 3857). This means that any given spatial extent for the AOI is, by default, passed to the script tool in the unit "meters" rather than decimal degrees or degrees-minutes-seconds. The Sen2Cube backend expects to receive the AOI in the WGS84 (EPSG: 4326) projection in decimal degrees. To resolve this the following functions were implemented:
 
-- <i>In script tool 1</i>: The tool read the extent and the map's current CRS. It then converts the given extent into ARcGIS point objects and <b>reprojects</b> them from the given CRS into the WGS84 CRS. This way the map displayed in the project can stay in the CRS chosen by the user. 
+- <i>In script tool 1</i>: The tool reads the input extent and the map's current CRS. It then converts the given extent into ARcGIS point objects and <b>reprojects</b> them from the given CRS into the WGS84 CRS. This way the map displayed in the project can stay in the CRS chosen by the user. 
 - <i>In script tool 2</i>: This tool loads several intermediate objects into the map (the footprint of the factbases and the selected AOI) as well as the final results. Since the factbase footprints are in WGS84 and reprojecting them into the Web Mercator format proved difficult, this tool <b>changes the map's CRS to WGS84 </b>when the tool is opened. Upon completion the CRS of the map can, of course, be changed back into any other CRS and will still contain all of the tools output products. 
 
 
