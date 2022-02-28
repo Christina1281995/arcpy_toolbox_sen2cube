@@ -66,16 +66,10 @@ In the background, a POST request is used to post the created inference datamode
 ### **Output** <br>
 Inference outputs can be either one or more Geotiff rasters, CSV tables or a mix of both. The outputs are read from the response object as soon as the inference status is switched to "SUCCESSFUL" by the system. The results are then downloaded into the user-specified target folder and additionally added to the active map in ArcGIS Pro. In case only CSV and no spatial information is produced, the additional AOI polygon indicates which are was investigated.
 
-### **Additional Products** <br>
-In addition to the outputs added to the map, the toolbox dynamically creates a polygon for the specified AOI and loads it together with a polygon representing the factbase coverage to the map. This is done before the tool is executed and allows the user to visually check whether the AOI lies within the factbase and identifies the AOI. The symbology was chosen in a way that the spatial information on the query is presented without being disturbing.
-
-
-
 ## Script Tool 1 (Static) Visual Concept
 <!-- ![image](https://user-images.githubusercontent.com/81073205/154639979-d092f2bc-8c99-4192-b123-1166612a5ab0.png) -->
 
-![sen2test](https://user-images.githubusercontent.com/81073205/154641356-e1387c56-3cbd-4ecb-983e-72aec67f9ea8.png)
-
+![16concept](https://user-images.githubusercontent.com/81073205/156006609-d64abdb4-8845-47e4-9065-94a7e6200e45.png)
 
 <br>
 <hr>
