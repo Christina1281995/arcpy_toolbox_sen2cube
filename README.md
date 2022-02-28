@@ -134,7 +134,7 @@ An example of these error messages is shown here:
 
 ## Contributions
 
-<b>Niklas Jaggy</b> - Login and Session Handling, POST requests to Sen2Cube, GET requests to Sen2Cube, filling inference request based on user input, displaying AOI in map, JSON data formatting, extracting information from inference result
+<b>Niklas Jaggy</b> - Login and Session Handling, POST requests to Sen2Cube, GET requests to Sen2Cube, filling inference request based on user input, displaying AOI in map, JSON data formatting, extracting information from inference result, documentation, general toolbox development, AOI area size validation (in progress)
 
 <b>Christina Zorenboehmer</b> - Login and Session Handling, token refresh with timer, Pop-Up box for login in static script tool, AOI CRS reprojection, filling inference request based on user input, JSON data formatting, handling multiple inference outputs and loading into map, validation functions for dynamic script tool (loading factbases and knowledgebases into parameters after login, validating time ranges and aoi on the fly, loading factbase aoi's into map on the fly, validation class login handling)
 
