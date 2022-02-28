@@ -88,17 +88,15 @@ The second version of the script tool implements a more dynamic functionality. I
   - If the entered end date is either before or after the selected factbase's valid time range an Error Message is returned to the user immediately asking them to adjust this input
   - If the entered end date is before the entered start date an Error Message is returned to the user immediately asking them to adjust this input
 - Once the user selects an Area of Interest (extent), the outline is <b>shown in the map</b> as well
-- If the Area of Interest (extent) does not intersect with the Factbase's footprint, an Error Message is returned to the user asking them to adjust the AOI. The error is re-evaluated if the user changes the AOI or the Factbase.
+- If the Area of Interest (extent) does not <b>intersect with the Factbase's footprint</b>, an Error Message is returned to the user asking them to adjust the AOI. The error is re-evaluated if the user changes the AOI or the Factbase.
 
 <br>
 
 An example of these error messages is shown here:
 
-![error2](https://user-images.githubusercontent.com/81073205/155802656-2a8355ba-f91b-44c3-bbc3-ba9e05608780.png)
+<img src="https://user-images.githubusercontent.com/81073205/156015509-d4d3b77f-bb55-4383-a823-e5dd43eedfa6.png" width="75%">
 
-![error1](https://user-images.githubusercontent.com/81073205/155802258-7eb4a18a-bd47-41e8-8fdb-648593954408.png)
-
-![14_error](https://user-images.githubusercontent.com/81073205/155994202-bf847ce1-f00d-4e0c-acbf-8ef10eab40a4.png)
+![14_error1](https://user-images.githubusercontent.com/81073205/156014557-e08ec76b-2652-43fd-a46c-7ea24bf6684b.png)
 
 <br>
 
@@ -136,5 +134,5 @@ An example of these error messages is shown here:
 
 <b>Niklas Jaggy</b> - Login and Session Handling, POST requests to Sen2Cube, GET requests to Sen2Cube, filling inference request based on user input, displaying AOI in map, JSON data formatting, extracting information from inference result, documentation, general toolbox development, AOI area size validation (in progress)
 
-<b>Christina Zorenboehmer</b> - Login and Session Handling, token refresh with timer, Pop-Up box for login in static script tool, AOI CRS reprojection, filling inference request based on user input, JSON data formatting, handling multiple inference outputs and loading into map, validation functions for dynamic script tool (loading factbases and knowledgebases into parameters after login, validating time ranges and aoi on the fly, loading factbase aoi's into map on the fly, validation class login handling), general toolbox development documentation
+<b>Christina Zorenboehmer</b> - Login and Session Handling, token refresh with timer, Pop-Up box for login in static script tool, AOI CRS reprojection, filling inference request based on user input, JSON data formatting, handling multiple inference outputs and loading into map, validation functions for dynamic script tool (loading factbases and knowledgebases into parameters after login, validating time ranges and aoi on the fly, loading factbase aoi's into map on the fly, validation class login handling), general toolbox development, documentation
 
