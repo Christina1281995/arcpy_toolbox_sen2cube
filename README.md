@@ -29,7 +29,9 @@ When opening the toolbox, you will see the two standalone script tools. Each can
 <br>
 <br>
  
-# Script Tool 1 (Static)
+# Script Tool Version 1 (Light-Weight, Static)
+
+<i>Code file available [here](https://github.com/Christina1281995/arcpy_toolbox_sen2cube/tree/main/src/static)</i>
 
 ### **Parameters** <br>
 Upon opening the tool, the user is promted to set a total of 8 optional and required parameters in the toolbox user interface. While the first seven will be used for creating the inference, the last one lets the user specify an output directory for the model outputs. 
@@ -66,18 +68,23 @@ In the background, a POST request is used to post the created inference datamode
 ### **Output** <br>
 Inference outputs can be either one or more Geotiff rasters, CSV tables or a mix of both. The outputs are read from the response object as soon as the inference status is switched to "SUCCESSFUL" by the system. The results are then downloaded into the user-specified target folder and additionally added to the active map in ArcGIS Pro. In case only CSV and no spatial information is produced, the additional AOI polygon indicates which are was investigated.
 
-## Script Tool 1 (Static) Visual Concept
+### How It Works
+
+A visual step-by-step display of how the tool works. 
+
 <!-- ![image](https://user-images.githubusercontent.com/81073205/154639979-d092f2bc-8c99-4192-b123-1166612a5ab0.png) -->
 
 ![17_concept](https://user-images.githubusercontent.com/81073205/156007240-db82b44c-bb5c-44be-be82-c2f382b9f09e.png)
 
 <br>
-<hr>
+<br>
 <br>
 <br>
 <br>
 
-# Script Tool 2 (Dynamic)
+# Script Tool Version 2 (Dynamic)
+
+<i>Code Files available [here](https://github.com/Christina1281995/arcpy_toolbox_sen2cube/tree/main/src/dynamic)</i>
 
 The second version of the script tool implements a more dynamic functionality. It is based on the first tool and implements much of the same functions. It also uses the same parameters. <b>In contrast to the first version, which only establishes a connection with Sen2Cube when the user has already set the parameters and clicks "run", this version creates the connection to Sen2Cube at the beginning and then validates the user's parameter inputs on the fly.</b>
 
@@ -100,7 +107,9 @@ An example of these error messages is shown here:
 
 <br>
 
-## Script Tool 2 (Dynamic) Visual Concept
+### How it works
+
+A visual step-by-step display of how the tool works. 
 
 <br>
 
