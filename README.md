@@ -132,11 +132,9 @@ An example of these error messages is shown here:
 - Implement an area check on the entered AOI, i.e. with a maximum allowed size to avoid a user time-out after 600 seconds.
 - Handing the user more descriptive error messages from the backend.
 - Transferring the logic of the entire toolbox into a QGIS Plugin using the respective plugin creator for a free software solution.
+- Add metadata! Not possible while creating the toolbox: 
 
+![15_metadata](https://user-images.githubusercontent.com/81073205/156004080-8b7fbd80-a090-4cf3-8c13-d76e2bb60300.png)
 
-
-## Demo Video
-
- https://user-images.githubusercontent.com/81073205/154838342-a6c6def6-32ff-4a1f-952a-6ccddb73af7b.mp4
 
 
