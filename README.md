@@ -137,4 +137,9 @@ An example of these error messages is shown here:
 ![15_metadata](https://user-images.githubusercontent.com/81073205/156004080-8b7fbd80-a090-4cf3-8c13-d76e2bb60300.png)
 
 
+## Contributions
+
+<b>Niklas Jaggy</b> - Login and Session Handling, POST requests to Sen2Cube, GET requests to Sen2Cubem displaying AOI in map
+
+<b>Christina Zorenboehmer</b> - Login and Session Handling, Pop-Up box for login, AOI CRS reprojection, validation functions for dynamic script tool (loading factbases and knowledgebases into parameters after login, validating time ranges on the fly, validating aoi on the fly, loading factbase aoi's into map on the fly, validation class login handling)
 
