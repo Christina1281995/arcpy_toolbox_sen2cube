@@ -94,6 +94,7 @@ The second version of the script tool implements a more dynamic functionality. I
   - If the entered end date is either before or after the selected factbase's valid time range an Error Message is returned to the user immediately asking them to adjust this input
   - If the entered end date is before the entered start date an Error Message is returned to the user immediately asking them to adjust this input
 - Once the user selects an Area of Interest (extent), the outline is <b>shown in the map</b> as well
+- If the Area of Interest (extent) does not intersect with the Factbase's footprint, an Error Message is returned to the user asking them to adjust the AOI. The error is re-evaluated if the user changes the AOI or the Factbase.
 
 <br>
 
@@ -102,6 +103,8 @@ An example of these error messages is shown here:
 ![error2](https://user-images.githubusercontent.com/81073205/155802656-2a8355ba-f91b-44c3-bbc3-ba9e05608780.png)
 
 ![error1](https://user-images.githubusercontent.com/81073205/155802258-7eb4a18a-bd47-41e8-8fdb-648593954408.png)
+
+![14_error](https://user-images.githubusercontent.com/81073205/155994004-d47ed1bf-e14d-4593-8931-9e9de440b85a.png)
 
 <br>
 
