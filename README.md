@@ -28,7 +28,7 @@ When opening the toolbox, you will see the two standalone script tools. Each can
 
 <br>
 <br>
-
+ 
 # Script Tool 1 (Static)
 
 ### **Parameters** <br>
