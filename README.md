@@ -94,7 +94,7 @@ A visual step-by-step display of how the tool works.
 
 <i>Code Files available [here](https://github.com/Christina1281995/arcpy_toolbox_sen2cube/tree/main/src/dynamic)</i>
 
-The second version of the script tool implements a more dynamic functionality. It is based on the first tool and implements much of the same functions. It also uses the same parameters. <b>In contrast to the first version, which only establishes a connection with Sen2Cube when the user has already set the parameters and clicks "run", this version creates the connection to Sen2Cube at the beginning and then validates the user's parameter inputs on the fly.</b>
+The second version of the script tool implements a more dynamic functionality. It is based on the first tool and implements many of the same functions. It also uses the same parameters. <b>In contrast to the first version, which only establishes a connection with Sen2Cube when the user has already set the parameters and clicks "run", this version creates the connection to Sen2Cube at the beginning and then validates the user's parameter inputs on the fly.</b>
 
 - Only factbases with the <b>status "OK"</b> are loaded into the drop down box for Factbases
 - Once a Factbase is selected, it is <b>shown in the map</b> to make the Area of Interest selection more intuitive
@@ -114,6 +114,8 @@ An example of these error messages is shown here:
 ![14_error1](https://user-images.githubusercontent.com/81073205/156014557-e08ec76b-2652-43fd-a46c-7ea24bf6684b.png)
 
 <br>
+
+This second version of the script tool is likely the more user-friendly Sen2Cube prototype toolbox since it actively responds to the user's input, helping the user create a successful inference request. The visual components (the AOI and the factbase footprints) also enhance the user experience. By seeing the valid factbase footprint on the map it is easier for the user to understand where to place the AOI. Though this toolbox works, there are some further issues that need to be dealt with - these are outlined in the "Challenges and Future To-Do's" below.
 
 ### How it works
 
