@@ -69,7 +69,7 @@ Inference outputs can be either one or more Geotiff rasters, CSV tables or a mix
 ## Script Tool 1 (Static) Visual Concept
 <!-- ![image](https://user-images.githubusercontent.com/81073205/154639979-d092f2bc-8c99-4192-b123-1166612a5ab0.png) -->
 
-![16concept](https://user-images.githubusercontent.com/81073205/156006609-d64abdb4-8845-47e4-9065-94a7e6200e45.png)
+![17_concept](https://user-images.githubusercontent.com/81073205/156007240-db82b44c-bb5c-44be-be82-c2f382b9f09e.png)
 
 <br>
 <hr>
