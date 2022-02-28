@@ -33,7 +33,12 @@ When opening the toolbox, you will see the two standalone script tools. Each can
 
 <i>Code file available [here](https://github.com/Christina1281995/arcpy_toolbox_sen2cube/tree/main/src/static)</i>
 
-### **Parameters** <br>
+In this initial scipt tool the objective was to create a connection to Sen2Cube and load an inference result into the ArcGIS Pro map. The tool is structured in such a manner that all parameters are first defined by the user and when the uesr then clicks "Run" a pop up window prompts the user to login to Sen2Cube. For the login a tkinter pop-up window was created, where the user enters their credentials. This toolbox comes with a pre-defined (hard-coded) set of factbases and knowledgebases from which the user can choose. All user inputs are then converted into the required formats for the Sen2Cube inference request. Once the inference is sent, every 10 seconds the script tool checks the status of the inferece. Once the status is "Succeeded" the result is downloaded and saved in the user's specified folder and automatically loaded into the map.
+
+A large amount of time was spent understanding the OAuth login and session handling process to correctly generate a user token and refresh it after a certain amount of time. In addition, the formatting and conversion of the data to match the Sen2Cube requirements took some trial & error. During the testing phase it was seen that the pop-up window (implemented with tkinter) appears to work differently on different devices. Since no on-the-fly parameter validation is implemented here the user must be familiar with the valid geographic and temporal ranges. 
+
+<b>Parameters</b>
+
 Upon opening the tool, the user is promted to set a total of 8 optional and required parameters in the toolbox user interface. While the first seven will be used for creating the inference, the last one lets the user specify an output directory for the model outputs. 
 Complete list of toolbox parameters: <br>
 
@@ -58,14 +63,17 @@ After clicking "Run" these further parameters are required from the user in a po
 
 <i> * Required Parameters </i>
 
-### **Login and Session Handling** <br>
+<b>Login and Session Handling</b>
+
 Only registered users are able to use the toolbox. Therefore, when the tool is run, a pop-up login window asks the user for credentials to request the initial session token. This token is needed to create POST and GET requests to the JSON web API that interacts with the Sen2Cube backend. The initial token is only valid for 5 minutes, thus a refreshment is performed in the backbround to keep the session alive. <br>
 Major parts of logic and code for login and session handling are based on the [Sen2Cli repository](https://github.com/ZGIS/sen2cli/tree/main/sen2cli).
 
-### **Requests** <br>
+<b>Requests</b>
+
 In the background, a POST request is used to post the created inference datamodel to the inference API endpoint which will then create an inference entity which is executed by the backend. When the inference is posted, the inferece status is recurrently requested using a GET request until the inference failed or was successful. In the former case the process is exited, in the latter case the outputs are accessed.
 
-### **Output** <br>
+<b>Output</b>
+
 Inference outputs can be either one or more Geotiff rasters, CSV tables or a mix of both. The outputs are read from the response object as soon as the inference status is switched to "SUCCESSFUL" by the system. The results are then downloaded into the user-specified target folder and additionally added to the active map in ArcGIS Pro. In case only CSV and no spatial information is produced, the additional AOI polygon indicates which are was investigated.
 
 ### How It Works
