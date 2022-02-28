@@ -384,25 +384,26 @@ class ToolValidator:
         # Customize messages for the parameters.
         # This gets called after standard validation.
 
-        auth_token_url = "https://auth.sen2cube.at/realms/sen2cube-at/protocol/openid-connect/token"
-        auth_client_id = "iq-web-client"
 
-        if self.params[2] == True:
+        if self.params[2].value == True:
+            auth_token_url = "https://auth.sen2cube.at/realms/sen2cube-at/protocol/openid-connect/token"
+            auth_client_id = "iq-web-client"
             username = self.params[0].value
             password = self.params[1].value
             token_text = fetch_token(username, password, auth_token_url, auth_client_id)
 
+            global fb_result
             fb_result = get_fb(token_text)
 
-        global allowed_start
-        global allowed_end
+            global allowed_start
+            global allowed_end
 
-        selected_fb = self.params[3].value
+            selected_fb = self.params[3].value
 
-        # ------------------------------------ CHECKS FOR DATE RANGE -----------------------------------------
+            # ------------------------------------ CHECKS FOR DATE RANGE -----------------------------------------
 
-        # Date format in Sen2Cube JSON: 2021-01-28
-        # Date format from user input: 2022-02-02 20:09:08
+            # Date format in Sen2Cube JSON: 2021-01-28
+            # Date format from user input: 2022-02-02 20:09:08
 
         # Start Date
         if self.params[6].altered:
