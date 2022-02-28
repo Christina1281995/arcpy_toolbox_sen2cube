@@ -104,7 +104,7 @@ An example of these error messages is shown here:
 
 ![error1](https://user-images.githubusercontent.com/81073205/155802258-7eb4a18a-bd47-41e8-8fdb-648593954408.png)
 
-![14_error](https://user-images.githubusercontent.com/81073205/155994004-d47ed1bf-e14d-4593-8931-9e9de440b85a.png)
+![14_error](https://user-images.githubusercontent.com/81073205/155994202-bf847ce1-f00d-4e0c-acbf-8ef10eab40a4.png)
 
 <br>
 
@@ -124,12 +124,12 @@ An example of these error messages is shown here:
 - <i>In script tool 1</i>: The tool reads the input extent and the map's current CRS. It then converts the given extent into ARcGIS point objects and <b>reprojects</b> them from the given CRS into the WGS84 CRS. This way the map displayed in the project can stay in the CRS chosen by the user. 
 - <i>In script tool 2</i>: This tool loads several intermediate objects into the map (the footprint of the factbases and the selected AOI) as well as the final results. Since the factbase footprints are in WGS84 and reprojecting them into the Web Mercator format proved difficult, this tool <b>changes the map's CRS to WGS84 </b>when the tool is opened. Upon completion the CRS of the map can, of course, be changed back into any other CRS and will still contain all of the tools output products. 
 
+<b>Scripting the Tool Validation:</b> The tool validator reacts according to the user's live parameter input. As such, no "logging" or "print messages" are available to the programmer designing the validation functions. This proved to be a tedious task. A work-around was to user a "dummy" parameter or to add Error Messages to parameters whose values contain certain messages that reveal some insight into any errors in the code. In particular, working with geographical queries or objects was complex since the input for a "dummy parameter" or for Error messages can only be a string, and converting geographical objects into useful strings was not easy (this was the case for validating if the AOI intersects the Factbase).
 
 ## Future To-Do's
 - Allowing a more diverse input for the AOI. Currently the tool only accepts an extent. In the future, this should be expanded for more complex shapes.
 - The default option of the AOI needs to be handled.
 - Implement an area check on the entered AOI, i.e. with a maximum allowed size to avoid a user time-out after 600 seconds.
-- Check if the AOI lies within the factbase's footprint on the fly and return an error message if not.
 - Handing the user more descriptive error messages from the backend.
 - Transferring the logic of the entire toolbox into a QGIS Plugin using the respective plugin creator for a free software solution.
 
