@@ -15,7 +15,8 @@ A detailed description on how the semantic EO data cube and the Sen2Cube work in
 
 
 ## Installation in ArcGIS Pro
-Simply download the [Proof of Concept.atbx](https://github.com/Christina1281995/arcpy_toolbox_sen2cube/raw/main/Proof%20of%20Concept.atbx) and then add it to your ArcGIS Project as shown below. This toolbox was created for <b>ArcGIS Pro 2.9.</b>, if you are using an alternative version the toolbox may not be recognised by ArcGIS.
+Simply download the [Proof of Concept.atbx](https://github.com/Christina1281995/arcpy_toolbox_sen2cube/raw/main/Proof%20of%20Concept.atbx) and then add it to your ArcGIS Project as shown below. 
+Attention: This toolbox was created for <b>ArcGIS Pro Version 2.9</b>, if you are using an alternative version the toolbox may not be recognised by ArcGIS.
 
 <br>
 
