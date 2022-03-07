@@ -156,3 +156,19 @@ A visual step-by-step display of how the tool works.
 
 <b>Christina Zorenboehmer</b> - Login and Session Handling, token refresh, Pop-Up login box, AOI CRS reprojection, filling inference request based on user input, JSON data formatting, handling multiple inference outputs and loading into map, validation functions for dynamic script tool (loading factbases and knowledgebases into parameters after login, validating time ranges and AOI on the fly, loading factbase AOIs into map on the fly, validation class login handling), general toolbox development, documentation
 
+## Demo Video 
+
+Kabul River, Afghanistan: Count Water Presence Inference.
+
+This demo shows an example of how to use the toolbox and then work with the results in ArcGIS.
+
+<img src="https://user-images.githubusercontent.com/81073205/157129666-bd5048a5-7156-44a1-aad5-3bcba14b686a.gif" width="30%">
+
+### Demo (1/2): Downloading Toolbox, Parameterisation
+
+https://user-images.githubusercontent.com/81073205/157130738-7008e2ec-e4fb-4dfd-8c7c-ecd721c8f38e.mp4
+
+### Demo (2/2): Visualising Results
+
+https://user-images.githubusercontent.com/81073205/157130825-08cd7dd9-79a2-4177-8078-7d9db24695d1.mp4
+
