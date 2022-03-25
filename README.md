@@ -5,7 +5,7 @@
 This toolbox serves as a simple proof of concept to demonstrate the compatibility of the [Sen2Cube](https://www.sen2cube.at/) EO Data Cube with ArcGIS Pro such that registered users can access the application directly from within their ArcGIS Pro desktop software.
 <br>
 <br>
-<i><b>This toolbox is a prototype. It includes two standalone script tools that represent two different versions of the Proof of Concept Script Tool. Once is a more static, light-weight tool. The second is a more dynamic tool, designed to validate parameter inputs on the fly.</b></i>
+<i><b>This toolbox is a prototype. It includes three standalone script tools that represent three different versions of the Proof of Concept Script Tool. Once is a more static, light-weight tool. The second is a more dynamic tool, designed to validate parameter inputs on the fly. The third one is a batch version, which can be used in model builder for batching different AOIs and soon also different dates.</b></i>
 <br>
 <br>
 
@@ -15,14 +15,14 @@ A detailed description on how the semantic EO data cube and the Sen2Cube work in
 
 
 ## Installation in ArcGIS Pro
-Simply download the [Proof of Concept.atbx](https://github.com/Christina1281995/arcpy_toolbox_sen2cube/raw/main/Proof%20of%20Concept.atbx) and then add it to your ArcGIS Project as shown below. This toolbox was created for ArcGIS Pro 2.9.
+Simply download the content of the folder "Sen2Cube_Toolbox") and then add it to your ArcGIS Project as shown below. This toolbox was created for ArcGIS Pro 2.9.
 
 <br>
 
 <img src="https://user-images.githubusercontent.com/81073205/155815217-aa0b22f6-822a-4f99-a693-b838ab87f63e.png" width="80%">
 <br>
 
-When opening the toolbox, you will see the two standalone script tools. Each can be executed independently.
+When opening the toolbox, you will see the three standalone script tools. Each can be executed independently.
 
 <img src="https://user-images.githubusercontent.com/81073205/155879690-2d4dde5e-8c3f-4b74-97ad-cb9badd81522.png" witdth="50%">
 
