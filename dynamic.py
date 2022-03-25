@@ -239,11 +239,11 @@ if __name__ == '__main__':
 
     # Get User Input for Knowledgebase: Parameter is the title of the knowledgebase
     knowledgebase_input = arcpy.GetParameterAsText(4)
-
+    payload = {'page[size]': 0}
     # Get Request for Knowledgebases
     with requests.Session() as s:
         s.headers.update(headers)
-        knowledgebase = s.get(kb_list).json()
+        knowledgebase = s.get(kb_list, params=payload).json()
 
         # Search for the correct Title - then take that knowledgebase's ID for Inference Template
         length_kb = len(knowledgebase['data'])
@@ -405,9 +405,13 @@ if __name__ == '__main__':
 
     # Get each of the outputs
     for output in inference_output:
-        output_url.append(output["data"])
-        output_name.append(output["name"])
         output_type.append(output["file_type"])
+        if output["file_type"] == "geotiff":
+            output_url.append(output["data"].replace("4326.tiff","3035.tiff"))
+        else:
+            output_url.append(output["data"])
+        output_name.append(output["name"])
+
 
     # ---------------------------------- STEP 4: DOWNLOAD AND ADD INFERENCE TO MAP -------------------------------------
 
