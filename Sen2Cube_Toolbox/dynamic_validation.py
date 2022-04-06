@@ -183,15 +183,17 @@ class ToolValidator:
                 titles = []
                 # Send Get Request
                 headers = {'Authorization': 'Bearer {}'.format(token_text['access_token'])}
+                payload = {'page[size]': 0}	
                 with requests.Session() as s:
                     s.headers.update(headers)
-                    kb_result = s.get(kb_list).json()
-
+                    kb_result = s.get(kb_list, params=payload).json()	
+                    
                     # Get all titles
                     for j in range(len(kb_result['data'])):
                         titles.append(kb_result['data'][j]['attributes']['title'])
 
                     # Add titles to parameter drop-down list
+                    titles.sort()
                     self.params[4].filter.list = titles
 
                 # Show all other parameters now
@@ -491,8 +493,7 @@ class ToolValidator:
             count = int(arcpy.GetCount_management(check_aoi)[0])
             # Add error message if 0 (= no features intersect)
             if count == 0:
-                self.params[5].setErrorMessage(
-                    "The chosen Area of Interest does not overlap with the footprint of the selected Factbase. Please adjust the Area of Interest.")
+                self.params[5].setErrorMessage("The chosen Area of Interest does not overlap with the footprint of the selected Factbase. Please adjust the Area of Interest.")
             # Clear Selection
             arcpy.management.SelectLayerByAttribute(check_aoi, 'CLEAR_SELECTION')
 
