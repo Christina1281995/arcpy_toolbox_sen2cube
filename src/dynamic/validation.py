@@ -12,7 +12,7 @@ import requests_oauthlib
 import oauthlib
 import time
 
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from oauthlib.oauth2 import InvalidGrantError, LegacyApplicationClient, OAuth2Token, \
     UnauthorizedClientError
 from requests import Response
@@ -58,8 +58,9 @@ def get_fb(token_text):
     with requests.Session() as s:
         s.headers.update(headers)
         fb_result = s.get(fb_list).json()
+        now = datetime.utcnow()
 
-    return fb_result
+    return fb_result, now
 
 
 class ToolValidator:
@@ -140,155 +141,176 @@ class ToolValidator:
 
                 entries = []
 
-                fb_result = get_fb(token_text)
+                fb_result, now = get_fb(token_text)
+                # Subtract 300 seconds to the time that was gotten in the same moment as the factbase list
+                now_minus300secs = now - timedelta(seconds=300)
 
-                # Only take the titles of those factbases where Status == OK
+                # Only take the titles of those factbases where busy ping or free ping was less than 300 secs ago
                 for i in range(len(fb_result['data'])):
-                    if fb_result['data'][i]['attributes']['status'] == "OK":
+                    # Get pings from JSON
+                    busy_worker = fb_result['data'][i]['attributes']['busy_worker_ping']
+                    free_worker = fb_result['data'][i]['attributes']['free_worker_ping']
+                    # Turn into python time values
+                    check_busy = datetime.strptime(busy_worker, "%Y-%m-%dT%H:%M:%S.%f+00:00")
+                    check_free = datetime.strptime(free_worker, "%Y-%m-%dT%H:%M:%S.%f+00:00")
+
+                    # Check if either the free ping or the busy ping was within the last 300 seconds
+                    if check_free > now_minus300secs:
+                        entries.append(fb_result['data'][i]['attributes']['title'])
+                    elif check_busy > now_minus300secs:
                         entries.append(fb_result['data'][i]['attributes']['title'])
 
-                # Add titles to parameter drop-down list
-                self.params[3].filter.list = entries
-                # Make Factbase parameter visible
-                self.params[3].enabled = True
+                # Add any "online" factbase titles to parameter drop-down list
+                if len(entries) > 0:
+                    self.params[3].filter.list = entries
+                    # Make Factbase parameter visible
+                    self.params[3].enabled = True
+                else:
+                    self.params[3].value = "n/a"
+                    self.params[3].enabled = True
+                    # sys.exit(0)
 
         # ------------------------------------ FILL KNOWLEDGEBASE VALUES  -----------------------------------------
 
         # If a Factbase is selected
         if self.params[3].altered:
 
-            # Get list of Knowledgebases
-            titles = []
-            # Send Get Request
-            headers = {'Authorization': 'Bearer {}'.format(token_text['access_token'])}
-            with requests.Session() as s:
-                s.headers.update(headers)
-                kb_result = s.get(kb_list).json()
-
-                # Get all titles
-                for j in range(len(kb_result['data'])):
-                    titles.append(kb_result['data'][j]['attributes']['title'])
-
-                # Add titles to parameter drop-down list
-                self.params[4].filter.list = titles
-
-            # Show all other parameters now
-            self.params[4].enabled = True  # Knowledgebase
-            self.params[5].enabled = True  # AOI
-            self.params[6].enabled = True  # Start Date
-            self.params[7].enabled = True  # End Date
-            self.params[8].enabled = True  # Comment
-            self.params[9].enabled = True  # Favourite
-            self.params[10].enabled = True  # Output Directory
-
-            # Chosen Factbase
-            selected_fb = self.params[3].value
-
-            # ----------------------------- SHOW FACTBASE FOOTPRINT IN MAP -----------------------------------------
-
-            # File Name and Path to Scratch DB
-            fp_line_path = os.path.join(str(db_path), "temp")
-
-            # Handle Whitespace in name for Syria
-            if str(selected_fb) == "North-Western Syria":
-                name = "Syria_Factbase_Footprint"
-            else:
-                name = f"{str(selected_fb)}_Factbase_Footprint"
-
-            fp_poly_path = os.path.join(str(db_path), name)
-
-            # If the selected Factbase Footprint already exists - pass
-            if arcpy.Exists(fp_poly_path):
+            if self.params[3].value == "n/a":
                 pass
+
             else:
-                check_syria = os.path.join(str(db_path), "Syria_Factbase_Footprint")
-                check_austria = os.path.join(str(db_path), "Austria_Factbase_Footprint")
-                check_afghanistan = os.path.join(str(db_path), "Afghanistan_Factbase_Footprint")
-                check_semantix = os.path.join(str(db_path), "Semantix_Factbase_Footprint")
+                # Get list of Knowledgebases
+                titles = []
+                # Send Get Request
+                headers = {'Authorization': 'Bearer {}'.format(token_text['access_token'])}
+                with requests.Session() as s:
+                    s.headers.update(headers)
+                    kb_result = s.get(kb_list).json()
 
-                # Delete any other Factbase Footprint
-                if str(selected_fb) == "Austria":
-                    if arcpy.Exists(check_semantix):
-                        arcpy.Delete_management(check_semantix)
-                    if arcpy.Exists(check_syria):
-                        arcpy.Delete_management(check_syria)
-                    if arcpy.Exists(check_afghanistan):
-                        arcpy.Delete_management(check_afghanistan)
+                    # Get all titles
+                    for j in range(len(kb_result['data'])):
+                        titles.append(kb_result['data'][j]['attributes']['title'])
 
-                elif str(selected_fb) == "North-Western Syria":
-                    if arcpy.Exists(check_semantix):
-                        arcpy.Delete_management(check_semantix)
-                    if arcpy.Exists(check_austria):
-                        arcpy.Delete_management(check_austria)
-                    if arcpy.Exists(check_afghanistan):
-                        arcpy.Delete_management(check_afghanistan)
+                    # Add titles to parameter drop-down list
+                    self.params[4].filter.list = titles
 
-                elif str(selected_fb) == "Afghanistan":
-                    if arcpy.Exists(check_semantix):
-                        arcpy.Delete_management(check_semantix)
-                    if arcpy.Exists(check_syria):
-                        arcpy.Delete_management(check_syria)
-                    if arcpy.Exists(check_austria):
-                        arcpy.Delete_management(check_austria)
+                # Show all other parameters now
+                self.params[4].enabled = True  # Knowledgebase
+                self.params[5].enabled = True  # AOI
+                self.params[6].enabled = True  # Start Date
+                self.params[7].enabled = True  # End Date
+                self.params[8].enabled = True  # Comment
+                self.params[9].enabled = True  # Favourite
+                self.params[10].enabled = True  # Output Directory
 
-                elif str(selected_fb) == "SemantiX":
-                    if arcpy.Exists(check_austria):
-                        arcpy.Delete_management(check_austria)
-                    if arcpy.Exists(check_syria):
-                        arcpy.Delete_management(check_syria)
-                    if arcpy.Exists(check_afghanistan):
-                        arcpy.Delete_management(check_afghanistan)
+                # Chosen Factbase
+                selected_fb = self.params[3].value
 
-                for i in range(len(fb_result['data'])):
-                    if fb_result['data'][i]['attributes']['title'] == str(selected_fb):
-                        # Get Footprint of Factbase
-                        footprint = fb_result['data'][i]['attributes']['footprint']['features'][0]['geometry'][
-                            'coordinates']
+                # ----------------------------- SHOW FACTBASE FOOTPRINT IN MAP -----------------------------------------
 
-                reproj_points2 = []
-                footprint_array = arcpy.Array()
+                # File Name and Path to Scratch DB
+                fp_line_path = os.path.join(str(db_path), "temp")
 
-                # Getting the array of coordinates from the JSON from Sen2Cube - Each factbase handled individually
-                # because each data format different (amount of square brackets)
-                if str(selected_fb) == "Austria":
-                    for point in footprint[1][0]:
-                        # Create arcpy.Points and add to Array
-                        footprint_array.append(arcpy.Point(point[0], point[1]))
+                # Handle Whitespace in name for Syria
+                if str(selected_fb) == "North-Western Syria":
+                    name = "Syria_Factbase_Footprint"
+                else:
+                    name = f"{str(selected_fb)}_Factbase_Footprint"
 
-                elif str(selected_fb) == "North-Western Syria":
-                    for point in footprint[0][0]:
-                        # Create arcpy.Points and add to Array
-                        footprint_array.append(arcpy.Point(point[0], point[1]))
+                fp_poly_path = os.path.join(str(db_path), name)
 
-                elif str(selected_fb) == "Afghanistan":
-                    for point in footprint[0][0]:
-                        # Create arcpy.Points and add to Array
-                        footprint_array.append(arcpy.Point(float(point[0]), float(point[1])))
+                # If the selected Factbase Footprint already exists - pass
+                if arcpy.Exists(fp_poly_path):
+                    pass
+                else:
+                    check_syria = os.path.join(str(db_path), "Syria_Factbase_Footprint")
+                    check_austria = os.path.join(str(db_path), "Austria_Factbase_Footprint")
+                    check_afghanistan = os.path.join(str(db_path), "Afghanistan_Factbase_Footprint")
+                    check_semantix = os.path.join(str(db_path), "Semantix_Factbase_Footprint")
 
-                elif str(selected_fb) == "SemantiX":
-                    for point in footprint[0]:
-                        # Create arcpy.Points and add to Array
-                        footprint_array.append(arcpy.Point(point[0], point[1]))
+                    # Delete any other Factbase Footprint
+                    if str(selected_fb) == "Austria":
+                        if arcpy.Exists(check_semantix):
+                            arcpy.Delete_management(check_semantix)
+                        if arcpy.Exists(check_syria):
+                            arcpy.Delete_management(check_syria)
+                        if arcpy.Exists(check_afghanistan):
+                            arcpy.Delete_management(check_afghanistan)
 
-                for point in footprint_array:
-                    pnt_geometry = arcpy.PointGeometry(point, map_spatial_reference)
-                    projectedPointGeometry = pnt_geometry.projectAs(arcpy.SpatialReference(4326))
-                    reproj_points2.append(projectedPointGeometry)
+                    elif str(selected_fb) == "North-Western Syria":
+                        if arcpy.Exists(check_semantix):
+                            arcpy.Delete_management(check_semantix)
+                        if arcpy.Exists(check_austria):
+                            arcpy.Delete_management(check_austria)
+                        if arcpy.Exists(check_afghanistan):
+                            arcpy.Delete_management(check_afghanistan)
 
-                # Points to Line
-                arcpy.PointsToLine_management(reproj_points2, fp_line_path)
-                # Line to Polygon
-                arcpy.management.FeatureToPolygon(fp_line_path, fp_poly_path)
-                # Delete temp layer
-                arcpy.Delete_management(fp_line_path)
-                # Add to Map
-                activeMap.addDataFromPath(fp_poly_path)
+                    elif str(selected_fb) == "Afghanistan":
+                        if arcpy.Exists(check_semantix):
+                            arcpy.Delete_management(check_semantix)
+                        if arcpy.Exists(check_syria):
+                            arcpy.Delete_management(check_syria)
+                        if arcpy.Exists(check_austria):
+                            arcpy.Delete_management(check_austria)
 
-                layers = activeMap.listLayers()
-                for layer in layers:
-                    if layer.name == name:
-                        if layer.supports("TRANSPARENCY"):
-                            layer.transparency = 60
+                    elif str(selected_fb) == "SemantiX":
+                        if arcpy.Exists(check_austria):
+                            arcpy.Delete_management(check_austria)
+                        if arcpy.Exists(check_syria):
+                            arcpy.Delete_management(check_syria)
+                        if arcpy.Exists(check_afghanistan):
+                            arcpy.Delete_management(check_afghanistan)
+
+                    for i in range(len(fb_result['data'])):
+                        if fb_result['data'][i]['attributes']['title'] == str(selected_fb):
+                            # Get Footprint of Factbase
+                            footprint = fb_result['data'][i]['attributes']['footprint']['features'][0]['geometry'][
+                                'coordinates']
+
+                    reproj_points2 = []
+                    footprint_array = arcpy.Array()
+
+                    # Getting the array of coordinates from the JSON from Sen2Cube - Each factbase handled individually
+                    # because each data format different (amount of square brackets)
+                    if str(selected_fb) == "Austria":
+                        for point in footprint[1][0]:
+                            # Create arcpy.Points and add to Array
+                            footprint_array.append(arcpy.Point(point[0], point[1]))
+
+                    elif str(selected_fb) == "North-Western Syria":
+                        for point in footprint[0][0]:
+                            # Create arcpy.Points and add to Array
+                            footprint_array.append(arcpy.Point(point[0], point[1]))
+
+                    elif str(selected_fb) == "Afghanistan":
+                        for point in footprint[0][0]:
+                            # Create arcpy.Points and add to Array
+                            footprint_array.append(arcpy.Point(float(point[0]), float(point[1])))
+
+                    elif str(selected_fb) == "SemantiX":
+                        for point in footprint[0]:
+                            # Create arcpy.Points and add to Array
+                            footprint_array.append(arcpy.Point(point[0], point[1]))
+
+                    for point in footprint_array:
+                        pnt_geometry = arcpy.PointGeometry(point, map_spatial_reference)
+                        projectedPointGeometry = pnt_geometry.projectAs(arcpy.SpatialReference(4326))
+                        reproj_points2.append(projectedPointGeometry)
+
+                    # Points to Line
+                    arcpy.PointsToLine_management(reproj_points2, fp_line_path)
+                    # Line to Polygon
+                    arcpy.management.FeatureToPolygon(fp_line_path, fp_poly_path)
+                    # Delete temp layer
+                    arcpy.Delete_management(fp_line_path)
+                    # Add to Map
+                    activeMap.addDataFromPath(fp_poly_path)
+
+                    layers = activeMap.listLayers()
+                    for layer in layers:
+                        if layer.name == name:
+                            if layer.supports("TRANSPARENCY"):
+                                layer.transparency = 60
 
         # ------------------------------------ SHOW SELECTED AOI IN MAP -----------------------------------------
 
@@ -384,6 +406,8 @@ class ToolValidator:
         # Customize messages for the parameters.
         # This gets called after standard validation.
 
+        if self.params[3].value == "n/a":
+            self.params[3].setErrorMessage("No factbases are currently online. Please try again at a later time.")
 
         if self.params[2].value == True:
             auth_token_url = "https://auth.sen2cube.at/realms/sen2cube-at/protocol/openid-connect/token"
@@ -393,7 +417,7 @@ class ToolValidator:
             token_text = fetch_token(username, password, auth_token_url, auth_client_id)
 
             global fb_result
-            fb_result = get_fb(token_text)
+            fb_result, now = get_fb(token_text)
 
             global allowed_start
             global allowed_end
@@ -467,7 +491,8 @@ class ToolValidator:
             count = int(arcpy.GetCount_management(check_aoi)[0])
             # Add error message if 0 (= no features intersect)
             if count == 0:
-                self.params[5].setErrorMessage("The chosen Area of Interest does not overlap with the footprint of the selected Factbase. Please adjust the Area of Interest.")
+                self.params[5].setErrorMessage(
+                    "The chosen Area of Interest does not overlap with the footprint of the selected Factbase. Please adjust the Area of Interest.")
             # Clear Selection
             arcpy.management.SelectLayerByAttribute(check_aoi, 'CLEAR_SELECTION')
 
