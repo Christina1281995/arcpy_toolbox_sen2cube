@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tool:               Sen2Cube ArcGIS Proof of Concept
 Source Name:        <File name>
 Version:            ArcGIS Pro 2.9
