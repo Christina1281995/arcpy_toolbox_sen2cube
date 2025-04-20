@@ -143,10 +143,10 @@ def check_inference_status(latest_status, access_token, inference_id):
         status = str(inference_current["data"]["attributes"]["status"])
         if latest_status != status:
             msg =f"Current status: {str(status)}"
-        if status == "FAILED":
-            msg = "Inference failed."
+        if status == "FAILED" or status == "ABORTED":
+            msg = str(inference_current["data"]["attributes"]["status_message"])
         if status == "SUCCEEDED":
-            msg = f"Inference {str(inference_id)} completed."
+            msg = str(inference_current["data"]["attributes"]["status_message"])
         else:
             msg = ""
     

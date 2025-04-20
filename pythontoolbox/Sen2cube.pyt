@@ -38,7 +38,7 @@ GLOBAL_VALS = {
 
 DEBUGGING_TXT_FILE = r"C:/Users/chris/Documents/GitHub Repos/arcpy_toolbox_sen2cube/pythontoolbox/debugging.txt"
 TOKEN_DEBUGGING_TXT_FILE = r"C:/Users/chris/Documents/GitHub Repos/arcpy_toolbox_sen2cube/pythontoolbox/token_debugging.txt"
-AUTO_LOGOUT_SECONDS = 30
+AUTO_LOGOUT_SECONDS = 60
 BUFFER_SECONDS_UNTIL_TOKEN_EXPIRY = 15
 
 class Toolbox: 
@@ -521,7 +521,7 @@ class Sen2CubeTool:
         arcpy.AddMessage(u"\u200B")
 
         status = "-"
-        while status != "SUCCEEDED":
+        while status not in ["SUCCEEDED", "FAILED", "ABORTED"]:
             status, msg = check_inference_status(status, 
                                                  access_token=GLOBAL_VALS["access_token"], 
                                                  inference_id=inference_id)
