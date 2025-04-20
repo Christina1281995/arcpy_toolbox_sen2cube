@@ -4,9 +4,11 @@ from oauthlib.oauth2 import (
         OAuth2Token, 
         UnauthorizedClientError)
 from requests_oauthlib import OAuth2Session
+import requests
 
 AUTH_TOKEN_URL = "https://auth.sen2cube.at/realms/sen2cube-at/protocol/openid-connect/token"
 AUTH_CLIENT_ID = "iq-web-client"
+USER_INFO_URL = "https://auth.sen2cube.at/realms/sen2cube-at/protocol/openid-connect/userinfo"
 
 
 def get_access_token(username: str, 
@@ -84,3 +86,14 @@ def refresh_token(token: OAuth2Token,
         err_msg = f"Unknown error while refreshing token for URL {auth_token_url} as client {auth_client_id}.\n{str(e)}"
 
     return None, err_msg
+
+
+def get_preferred_username(access_token: str):
+    
+    headers = {'Authorization': 'Bearer {}'.format(access_token), 'Content-Type': 'application/json'}
+
+    with requests.Session() as s:
+        s.headers.update(headers)
+        user_info = s.get(USER_INFO_URL).json()
+
+    return user_info

@@ -79,14 +79,14 @@ def get_reprojected_aoi_geojson(aoi_extent):
 
 def send_inference(access_token: str,
                    username: str, 
-                  fb_id: str, 
-                  kb_id: str,
-                  extent_points: str,
-                  start_date: str,
-                  end_date: str,
-                  comment: str,
-                  favorite: bool,
-                  quick_preview: bool
+                   fb_id: str, 
+                   kb_id: str,
+                   extent_points: str,
+                   start_date: str,
+                   end_date: str,
+                   comment: str,
+                   favorite: bool,
+                   quick_preview: bool
                   ):
     """
     Fills the infrence template with all validated user inputs. 
