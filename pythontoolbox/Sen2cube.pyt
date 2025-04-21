@@ -528,9 +528,10 @@ class Sen2CubeTool:
             arcpy.AddMessage(msg)
             time.sleep(10)
 
-        get_inference_results(access_token=GLOBAL_VALS["access_token"],
-                              inference_id=inference_id,
-                              output_dir=output_dir)
+        if status == "SUCCEEDED":
+            get_inference_results(access_token=GLOBAL_VALS["access_token"],
+                                inference_id=inference_id,
+                                output_dir=output_dir)
         
         GLOBAL_VALS["inference_running"] = False
 

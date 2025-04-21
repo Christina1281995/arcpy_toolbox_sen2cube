@@ -1,2 +1,5 @@
 pythontoolbox/token_debugging.txt
 pythontoolbox/debugging.txt
+pythontoolbox/__pycache__/*
+pythontoolbox/processing_utils/__pycache__/*
+
