@@ -31,15 +31,12 @@ GLOBAL_VALS = {
     "selected_factbase_data": None,
     "knowledgebases": None,
     "username": None
-    # "login_counter": 0,
-    # "refresh_counter": 0,
-    # "other_counter": 0
 }
 
-DEBUGGING_TXT_FILE = r"C:/Users/chris/Documents/GitHub Repos/arcpy_toolbox_sen2cube/pythontoolbox/debugging.txt"
-TOKEN_DEBUGGING_TXT_FILE = r"C:/Users/chris/Documents/GitHub Repos/arcpy_toolbox_sen2cube/pythontoolbox/token_debugging.txt"
-AUTO_LOGOUT_SECONDS = 60
-BUFFER_SECONDS_UNTIL_TOKEN_EXPIRY = 15
+# DEBUGGING_TXT_FILE = r"C:/Users/chris/Documents/GitHub Repos/arcpy_toolbox_sen2cube/pythontoolbox/debugging.txt"
+# TOKEN_DEBUGGING_TXT_FILE = r"C:/Users/chris/Documents/GitHub Repos/arcpy_toolbox_sen2cube/pythontoolbox/token_debugging.txt"
+SECONDS_UNTIL_AUTO_LOGOUT = 360
+BUFFER_SECONDS_BEFORE_TOKEN_EXPIRY = 15
 
 class Toolbox: 
     def __init__(self):
@@ -48,7 +45,7 @@ class Toolbox:
         self.label = "Sen2Cube"
         self.alias = "Sen2Cube"
 
-        # List of tool classes associated with this toolbox
+        # this is a list of tool classes associated with this toolbox
         self.tools = [Sen2CubeTool]
 
  
@@ -185,21 +182,7 @@ class Sen2CubeTool:
                 datatype="GPBoolean",
                 parameterType="Optional",
                 direction="Input"
-            ),
-            # arcpy.Parameter( #15
-            #     displayName="Info (Debug)",
-            #     name="infodebug",
-            #     datatype="GPString",
-            #     parameterType="Optional",
-            #     direction="Input"
-            # ),
-            # arcpy.Parameter( #16
-            #     displayName="Info (Debug)1",
-            #     name="infodebug2",
-            #     datatype="GPString",
-            #     parameterType="Optional",
-            #     direction="Input"
-            # )
+            )
             ]
         
         # initial states of the parameters
@@ -239,14 +222,14 @@ class Sen2CubeTool:
 
         # ------------ LOGIN --------------
 
-        # the login checkbox is only enabled at the beginning, when the tool is opened 
+        # the login checkbox is enabled at the beginning, when the tool is opened 
         # so, if the user had previously logged in, but then opens the tool again, the user should have to login again
-        # therefore: set logged in variable to false
+        # therefore: set logged_in variable to false whenever login_checkbox is being shown
         if parameters[self.LOGIN_CHECKBOX].enabled:
             GLOBAL_VALS["logged_in"] = False
     
         # when the user changes the values for the username or password, 
-        # the tool clears any previous error messages (related to either missing parameters or 
+        # clears any previous error messages (related to either missing parameters or 
         # failed login attempts) --> this enables a new login attempt with the changed values
         if parameters[self.USERNAME].altered or parameters[self.PASSWORD].altered:
             parameters[self.HIDDEN_LOGIN_ERROR_MESSAGE].value = ""
@@ -255,7 +238,7 @@ class Sen2CubeTool:
         # attempt login
         if parameters[self.LOGIN_CHECKBOX].value == True:
 
-            # call updateMessages() to set error messages if one of the 
+            # first, call updateMessages(), which will set any error messages if one of the 
             # input params is still missing (i.e. no username or password supplied)
             self.updateMessages(parameters)
 
@@ -284,13 +267,13 @@ class Sen2CubeTool:
             GLOBAL_VALS["token_object"] = token
             GLOBAL_VALS["access_token"] = token["access_token"]
             GLOBAL_VALS["refresh_token"] = token["refresh_token"]
-            GLOBAL_VALS["refresh_token_time"] = token["expires_at"] - BUFFER_SECONDS_UNTIL_TOKEN_EXPIRY
+            GLOBAL_VALS["refresh_token_time"] = token["expires_at"] - BUFFER_SECONDS_BEFORE_TOKEN_EXPIRY
 
             # get user's preferred username (for "owner" label in inference) 
             user_info = get_preferred_username(GLOBAL_VALS["access_token"])
             GLOBAL_VALS["preferred_username"] = user_info["preferred_username"]
             
-            # ----------- START THREADS FOR TIME MONITORING AND TOKEN REFRESH -----------
+            # ----------- START THREADS FOR INACTIVITY MONITORING AND TOKEN REFRESH -----------
             self.start_thread_to_monitor_token_refresh_time()
             self.start_thread_to_monitor_inactivity_time(parameters)
 
@@ -298,17 +281,17 @@ class Sen2CubeTool:
             # ----------- GET ALL FACTBASE INFOS -----------
             all_factbase_data = get_available_factbases(GLOBAL_VALS["access_token"])
             GLOBAL_VALS["all_factbase_data"] = all_factbase_data
+            # add the titles of available factbases to parameter drop-down list
             available_factbases =  []
             for i in range(len(all_factbase_data['data'])):
                 if all_factbase_data['data'][i]['attributes']['status'] == "OK":
                     available_factbases.append(all_factbase_data['data'][i]['attributes']['title'])
-
-            # add the titles of available factbases to parameter drop-down list and make visible
             parameters[self.FACTBASE].filter.list = available_factbases
             
             # ----------- GET UESR'S KNOWLEDGEBASE MODELS -----------
             knowledgebases = get_knowledgebases(GLOBAL_VALS["access_token"])
             GLOBAL_VALS["knowledgebases"] = knowledgebases
+            # add the knowledgebases to parameter drop-down list
             kb_titles = list(knowledgebases.keys())
             parameters[self.KNOWLEDGEBASE].filter.list = kb_titles
             
@@ -324,26 +307,21 @@ class Sen2CubeTool:
 
         # ---------- RETURN TO LOGIN IF INACTIVE FOR TOO LONG ---------
 
-        # these conditions are checked each time the user interacts with the GUI
-        # so the inactivity-based logout will only "show" when the user returns to the 
+        # since this function is only executed whenever the user interacts with the GUI,
+        # the inactivity-based logout will only "show" when the user returns to the 
         # tool after being inactive for some time
  
-        # Either one of the Threads can set the logged_in variable to False 
+        # Either one of the threads can set the logged_in variable to False 
         #    -> either through inactivity for too long
         #    -> or if the token refresh didn't work
         if (GLOBAL_VALS["logged_in"] == "False" 
             and not parameters[self.LOGIN_CHECKBOX].enabled):
-
             parameters[self.INACTIVITY_RESET].value = True
         
         if parameters[self.INACTIVITY_RESET].value == True:
-            
-            # GLOBAL_VALS["stop_event_inactivity"].set()
             self.stop_thread_to_monitor_inactivity()
             self.stop_thread_to_monitor_refresh_time()
 
-            with open(DEBUGGING_TXT_FILE, "a") as f:
-                f.write(f"\n- Identified that the inactivity reset box is TRUE...")
             for idx in range(self.FACTBASE, (self.OUTPUT_DIR +1)):
                 parameters[idx].enabled = False
                 parameters[idx].value = None
@@ -379,33 +357,39 @@ class Sen2CubeTool:
         """Modify the messages created by internal validation for each tool
         parameter. This method is called after internal validation."""
 
-        # check if both username and password were entered
+        # ------ LOGIN CHECK ------
+        # 1) check if both username and password were entered
         if (parameters[self.LOGIN_CHECKBOX].altered 
             and (parameters[self.JUST_RESET].value == False
                  or parameters[self.JUST_RESET].value == None)):
             if not parameters[self.USERNAME].valueAsText:
                 parameters[self.LOGIN_CHECKBOX].setErrorMessage("The username is still missing.")
-                parameters[self.LOGIN_CHECKBOX].value = False
-            elif not parameters[self.PASSWORD].valueAsText:
-                parameters[self.LOGIN_CHECKBOX].setErrorMessage("The password ist still missing")
+                # reset login checkbox
                 parameters[self.LOGIN_CHECKBOX].value = False
                 return
-            
+            elif not parameters[self.PASSWORD].valueAsText:
+                parameters[self.LOGIN_CHECKBOX].setErrorMessage("The password ist still missing")
+                # reset login checkbox
+                parameters[self.LOGIN_CHECKBOX].value = False
+                return
+        
+        # 2) reset login settings after logout due to inactivity
         if (parameters[self.LOGIN_CHECKBOX].altered 
             and parameters[self.JUST_RESET].value == True):
             parameters[self.LOGIN_CHECKBOX].setErrorMessage("You have been logged out due to inactivity. Please re-login.")
             parameters[self.JUST_RESET].value = False
 
-        # display error message if login was not successful
+        # 3) Unsuccessful login attempt
         if (parameters[self.HIDDEN_LOGIN_ERROR_MESSAGE].altered 
-        and parameters[self.USERNAME].altered
-        and parameters[self.PASSWORD].altered):
+            and parameters[self.USERNAME].altered
+            and parameters[self.PASSWORD].altered):
             display_msg = parameters[self.HIDDEN_LOGIN_ERROR_MESSAGE].value
             if display_msg:
                 parameters[self.LOGIN_CHECKBOX].setErrorMessage(str(display_msg))
                 parameters[self.LOGIN_CHECKBOX].value = False
                 return
 
+        # ------ START DATE CHECK ------ 
         if parameters[self.START_DATE].altered and parameters[self.START_DATE].value != None: 
             
             # get allowed start and end dates
@@ -418,7 +402,8 @@ class Sen2CubeTool:
             input_start_date = self.parse_datetime_from_string(input_start)
             if input_start_date < allowed_start_date or input_start_date > allowed_end_date:
                 parameters[self.START_DATE].setErrorMessage(f"Start date is out of range.\nThe available date range for this factbase is {str(start_str)} to {str(end_str)}.\nPlease adjust the start date.")
-                
+
+        # ------ END DATE check ------ 
         if parameters[self.END_DATE].altered and parameters[self.END_DATE].value != None:
             
             # get allowed start and end dates
@@ -438,7 +423,8 @@ class Sen2CubeTool:
                     parameters[self.START_DATE].setErrorMessage(f"The selected end date is before the start date.\nPlease adjust the dates.")
                     parameters[self.END_DATE].setErrorMessage(f"The selected end date is before the start date.\nPlease adjust the dates.")
 
-        # Check AOI is within Factbase via "select by location"
+        # ------ AOI CHECK triggered by AOI alteration ------ 
+        # --> checks if the AOI 'contains', 'overlaps' with or is 'within' the Factbase
         if parameters[self.AOI].altered and parameters[self.AOI].value != None:
  
             aoi_extent = parameters[self.AOI].value
@@ -451,16 +437,16 @@ class Sen2CubeTool:
                 factbase_geojson_geometry = GLOBAL_VALS["selected_factbase_data"]["attributes"]["footprint"]["features"][0]["geometry"]
                 factbase_srs = GLOBAL_VALS["selected_factbase_data"]["attributes"]["srs"]
                 valid_extent = validate_aoi(aoi_extent, factbase_geojson_geometry, factbase_srs)
-                # parameters[self.INFO_DEBUG1].value = valid_extent
                 if valid_extent == False:
                     parameters[self.AOI].setErrorMessage(f"The entered extent doesn't intersect with the geometry of the selected factbase ({parameters[self.FACTBASE].valueAsText}). Please adjust the extent.")
- 
-        # Check AOI is contain, overlaps or is within the Factbase
+        
+        # ------ AOI CHECK triggered by Factbase alteration ------ 
+        # --> checks if the AOI 'contains', 'overlaps' with or is 'within' the Factbase
         if parameters[self.FACTBASE].altered and parameters[self.FACTBASE].value != None:
-            # only check if the user has changed the AOI/extent
+            # only check if the user has actually set or changed the AOI/extent
             if parameters[self.AOI].value != None:
                 aoi_extent = parameters[self.AOI].value
-                # only check if the AOI isn't reset (in which cse the values are 0,0,0,0)
+                # only check if the AOI isn't reset (in which case the values are 0,0,0,0)
                 xmin, ymin, xmax, ymax = aoi_extent.XMin, aoi_extent.YMin, aoi_extent.XMax, aoi_extent.YMax
                 if (xmin != 0 
                     and ymin != 0
@@ -469,7 +455,6 @@ class Sen2CubeTool:
                     factbase_geojson_geometry = GLOBAL_VALS["selected_factbase_data"]["attributes"]["footprint"]["features"][0]["geometry"]
                     factbase_srs = GLOBAL_VALS["selected_factbase_data"]["attributes"]["srs"]
                     valid_extent = validate_aoi(aoi_extent, factbase_geojson_geometry, factbase_srs)
-                    # parameters[self.INFO_DEBUG1].value = valid_extent
                     if valid_extent == False:
                         parameters[self.AOI].setErrorMessage(f"The entered extent doesn't intersect with the geometry of the selected factbase ({parameters[self.FACTBASE].valueAsText}). Please adjust the extent.")
 
@@ -516,8 +501,8 @@ class Sen2CubeTool:
         # Inform user
         arcpy.AddMessage(f"Inference created. ID: {str(inference_id)}\n")
         arcpy.AddMessage(u"\u200B")
-        arcpy.AddMessage("The request is now being processed by Sen2Cube. This process may take up to a few minutes.")
-        arcpy.AddMessage("Do not terminate the tool during this time, otherwise the inference will not be loaded into the map.")
+        arcpy.AddMessage("The request is now being processed by Sen2Cube.at. This process may take up to a few minutes.")
+        arcpy.AddMessage("Do not terminate the tool during this time, otherwise the inference results will not be loaded into the map.")
         arcpy.AddMessage(u"\u200B")
 
         status = "-"
@@ -562,64 +547,57 @@ class Sen2CubeTool:
     
     def thread_to_monitor_refresh_time(self):
         """
-        Monitors when the token needs to be refreshed and updates it automatically.
+        Thread that monitors time until token refresh is required (checks every 5 seconds)
+        
+        This function continuously checks whether the current authentication token is about to expire. 
+        If so, it attempts to refresh it. 
+        If the refreshing fails, it logs the user out and displays a message. The function runs until the user is logged out 
+        or a stop event is triggered.        
         """
         
         while GLOBAL_VALS["logged_in"] == True and not GLOBAL_VALS["stop_event_refresh"].is_set():
-
-            now = datetime.now().timestamp()
-            with open(TOKEN_DEBUGGING_TXT_FILE, "a") as f:
-                f.write(f"\n- checking refresh time")
-            
+            now = datetime.now().timestamp()  
             if now >= GLOBAL_VALS["refresh_token_time"]:
             
                 new_token, msg = refresh_token(token=GLOBAL_VALS["token_object"])
                 if new_token:
-                    with open(TOKEN_DEBUGGING_TXT_FILE, "a") as f:
-                        f.write(f"\n- successfully refreshed")
                     GLOBAL_VALS['token_object'] = new_token
                     GLOBAL_VALS['access_token'] = new_token["access_token"]
                     GLOBAL_VALS['refresh_token'] = new_token["refresh_token"]
-                    time_to_refresh = new_token["expires_at"] - BUFFER_SECONDS_UNTIL_TOKEN_EXPIRY
+                    time_to_refresh = new_token["expires_at"] - BUFFER_SECONDS_BEFORE_TOKEN_EXPIRY
                     GLOBAL_VALS["refresh_token_time"] = time_to_refresh
             
                 else:
                     GLOBAL_VALS["logged_in"] = False
                     arcpy.AddMessage(f"Could not refresh your authentication with sen2cube: {msg}.")
             
-            time.sleep(5)  # Only check every 5 seconds to avoid excessive CPU use
+            time.sleep(5)  # every 5 seconds is frequently enough + avoids too much CPU use
 
 
     def start_thread_to_monitor_token_refresh_time(self):
-        """Starts the token monitoring in a new thread."""
-        with open(TOKEN_DEBUGGING_TXT_FILE, "a") as f:
-            f.write(f"\n- Starting thread... thread refresh = {GLOBAL_VALS['thread_refresh']}")
+        """Starts the token monitoring in a new thread"""
+
         if GLOBAL_VALS["thread_refresh"] is None:
-            GLOBAL_VALS["stop_event_refresh"].clear()  # Reset the stop event
+            GLOBAL_VALS["stop_event_refresh"].clear()  # reset the stop event
             GLOBAL_VALS["thread_refresh"] = threading.Thread(target=self.thread_to_monitor_refresh_time)
-            GLOBAL_VALS["thread_refresh"].daemon = True  # Ensures the thread stops when the main program exits
+            GLOBAL_VALS["thread_refresh"].daemon = True  # makes sure the thread stops when the main program exits
             GLOBAL_VALS["thread_refresh"].start()
 
 
     def stop_thread_to_monitor_refresh_time(self):
         """Stops the token monitoring thread."""
-        with open(TOKEN_DEBUGGING_TXT_FILE, "a") as f:
-            f.write(f"\n- Stopping thread")
 
         try:
-            GLOBAL_VALS["stop_event_refresh"].set()  # Signal the thread to stop
+            GLOBAL_VALS["stop_event_refresh"].set()  # set the signal for the thread to stop
             if GLOBAL_VALS["thread_refresh"] and GLOBAL_VALS["thread_refresh"].is_alive():
-                GLOBAL_VALS["thread_refresh"].join()  # Wait for the thread to exit
+                GLOBAL_VALS["thread_refresh"].join()  # wait for the thread to exit
         finally:
+            # set the thread back to none so that it can be started up again if user does re-login
             GLOBAL_VALS["thread_refresh"] = None 
             
-            with open(TOKEN_DEBUGGING_TXT_FILE, "a") as f:
-                f.write(f"\n - Stopped Thread. Refresh Thread >>> {str(GLOBAL_VALS['thread_refresh'])}")
-
 
     def start_thread_to_monitor_inactivity_time(self, parameters):
-        with open(DEBUGGING_TXT_FILE, "a") as f:
-            f.write(f"\n- Starting thread ... thread inactivity = {GLOBAL_VALS['thread_inactivity']}")
+
         if GLOBAL_VALS["thread_inactivity"] is None:
             GLOBAL_VALS["stop_event_inactivity"].clear()
             GLOBAL_VALS["thread_inactivity"] = threading.Thread(target=lambda: self.thread_to_monitor_inactivity(parameters))
@@ -634,12 +612,10 @@ class Sen2CubeTool:
             # check time, calculate inactive time
             now = datetime.now().timestamp()
             time_inactive = now - GLOBAL_VALS["last_activity_time"]
-            with open(DEBUGGING_TXT_FILE, "a") as f:
-                f.write(f"\n- Time inactive: {str(time_inactive)}")
             
             # if inactive for too long (and its not because there is an inference running), 
             # then start logout process
-            if (time_inactive > AUTO_LOGOUT_SECONDS 
+            if (time_inactive > SECONDS_UNTIL_AUTO_LOGOUT 
                 and not GLOBAL_VALS["inference_running"]):
                 
                 GLOBAL_VALS["logged_in"] = False
@@ -653,16 +629,12 @@ class Sen2CubeTool:
                 GLOBAL_VALS["refresh_token"] = None
                 GLOBAL_VALS["refresh_token_time"] = None
 
-                with open(DEBUGGING_TXT_FILE, "a") as f:
-                    f.write(f"\n- Updated the inactivity reset: {parameters[self.INACTIVITY_RESET].valueAsText}")
                 break
             time.sleep(15)
 
 
     def stop_thread_to_monitor_inactivity(self):
         """Stops the inactivity thread."""
-        with open(DEBUGGING_TXT_FILE, "a") as f:
-            f.write(f"\n- Stopping thread")
 
         try:
             GLOBAL_VALS["stop_event_inactivity"].set()
@@ -670,6 +642,3 @@ class Sen2CubeTool:
                 GLOBAL_VALS["thread_inactivity"].join()
         finally:
             GLOBAL_VALS["thread_inactivity"] = None
-        
-            with open(DEBUGGING_TXT_FILE, "a") as f:
-                f.write(f"\n - Stopped Thread. Inactivity Thread >>> {str(GLOBAL_VALS['thread_inactivity'])}")
