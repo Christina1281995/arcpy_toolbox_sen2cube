@@ -30,7 +30,8 @@ GLOBAL_VALS = {
     "all_factbase_data": None,
     "selected_factbase_data": None,
     "knowledgebases": None,
-    "username": None
+    "username": None,
+    "logout_reason": ""
 }
 
 # DEBUGGING_TXT_FILE = r"C:/Users/chris/Documents/GitHub Repos/arcpy_toolbox_sen2cube/pythontoolbox/debugging.txt"
@@ -71,7 +72,8 @@ class Sen2CubeTool:
         self.OUTPUT_DIR = 11
         self.HIDDEN_LOGIN_ERROR_MESSAGE = 12
         self.INACTIVITY_RESET = 13
-        self.JUST_RESET = 14
+        self.REFRESH_TOKEN_FAIL = 14
+        self.JUST_RESET = 15
 
 
     def getParameterInfo(self):
@@ -177,6 +179,13 @@ class Sen2CubeTool:
                 direction="Input"
             ),
             arcpy.Parameter( #14
+                displayName="Refresh Token Fail",
+                name="refresh_token_fail",
+                datatype="GPBoolean",
+                parameterType="Optional",
+                direction="Input"
+            ),
+            arcpy.Parameter( #15
                 displayName="Just Reset",
                 name="just_reset",
                 datatype="GPBoolean",
@@ -201,6 +210,7 @@ class Sen2CubeTool:
         # and should not be shown
         params[self.HIDDEN_LOGIN_ERROR_MESSAGE].enabled = False
         params[self.INACTIVITY_RESET].enabled = False
+        params[self.REFRESH_TOKEN_FAIL].enabled = False
         params[self.JUST_RESET].enabled = False
          
         return params
@@ -274,7 +284,7 @@ class Sen2CubeTool:
             GLOBAL_VALS["preferred_username"] = user_info["preferred_username"]
             
             # ----------- START THREADS FOR INACTIVITY MONITORING AND TOKEN REFRESH -----------
-            self.start_thread_to_monitor_token_refresh_time()
+            self.start_thread_to_monitor_token_refresh_time(parameters)
             self.start_thread_to_monitor_inactivity_time(parameters)
 
 
@@ -316,9 +326,13 @@ class Sen2CubeTool:
         #    -> or if the token refresh didn't work
         if (GLOBAL_VALS["logged_in"] == "False" 
             and not parameters[self.LOGIN_CHECKBOX].enabled):
-            parameters[self.INACTIVITY_RESET].value = True
-        
-        if parameters[self.INACTIVITY_RESET].value == True:
+            if GLOBAL_VALS["logout_reason"] == "inactive":
+                parameters[self.INACTIVITY_RESET].value = True
+            elif GLOBAL_VALS["logout_reason"] == "refresh_fail":
+                parameters[self.REFRESH_TOKEN_FAIL].value = True
+
+        if (parameters[self.INACTIVITY_RESET].value == True 
+            or parameters[self.REFRESH_TOKEN_FAIL].value == True):
             self.stop_thread_to_monitor_inactivity()
             self.stop_thread_to_monitor_refresh_time()
 
@@ -335,6 +349,7 @@ class Sen2CubeTool:
 
             # lastly, reset the inactivity reset button back to false
             parameters[self.INACTIVITY_RESET].value = False
+            parameters[self.REFRESH_TOKEN_FAIL].value = False
             parameters[self.JUST_RESET].value = True
             return
         
@@ -376,8 +391,13 @@ class Sen2CubeTool:
         # 2) reset login settings after logout due to inactivity
         if (parameters[self.LOGIN_CHECKBOX].altered 
             and parameters[self.JUST_RESET].value == True):
-            parameters[self.LOGIN_CHECKBOX].setErrorMessage("You have been logged out due to inactivity. Please re-login.")
-            parameters[self.JUST_RESET].value = False
+            if GLOBAL_VALS["logout_reason"] == "inactive":
+                parameters[self.LOGIN_CHECKBOX].setErrorMessage("You have been logged out due to inactivity. Please re-login.")
+                parameters[self.JUST_RESET].value = False
+            elif "refresh_fail" in GLOBAL_VALS["logout_reason"]:
+                msg = GLOBAL_VALS["logout_reason"][14:]
+                parameters[self.LOGIN_CHECKBOX].setErrorMessage(f"Could not refresh your authentication with Sen2Cube.at. Please re-login.\nDetails: {str(msg)}")
+                parameters[self.JUST_RESET].value = False
 
         # 3) Unsuccessful login attempt
         if (parameters[self.HIDDEN_LOGIN_ERROR_MESSAGE].altered 
@@ -545,14 +565,14 @@ class Sen2CubeTool:
         return parsed_date
     
     
-    def thread_to_monitor_refresh_time(self):
+    def thread_to_monitor_refresh_time(self, parameters):
         """
-        Thread that monitors time until token refresh is required (checks every 5 seconds)
+        Monitors time until a token refresh is required (checks every 5 seconds), and
+        attempts to refresh the token when the conditions are met.
         
-        This function continuously checks whether the current authentication token is about to expire. 
-        If so, it attempts to refresh it. 
-        If the refreshing fails, it logs the user out and displays a message. The function runs until the user is logged out 
-        or a stop event is triggered.        
+        If the refreshing fails, it logs the user out and stores the error message in a variable so that
+        it can be displayed to the user. The function runs until the user is logged out or a stop event 
+        is triggered.
         """
         
         while GLOBAL_VALS["logged_in"] == True and not GLOBAL_VALS["stop_event_refresh"].is_set():
@@ -569,7 +589,10 @@ class Sen2CubeTool:
             
                 else:
                     GLOBAL_VALS["logged_in"] = False
-                    arcpy.AddMessage(f"Could not refresh your authentication with sen2cube: {msg}.")
+                    # the REFRESH_TOKEN_FAIL bool parameter is used internally 
+                    # to trigger the reset of parameters and to return to login page
+                    parameters[self.REFRESH_TOKEN_FAIL].value = True
+                    GLOBAL_VALS["logout_reason"] = f"refresh_fail: {str(msg)}"
             
             time.sleep(5)  # every 5 seconds is frequently enough + avoids too much CPU use
 
@@ -606,6 +629,11 @@ class Sen2CubeTool:
 
 
     def thread_to_monitor_inactivity(self, parameters):
+        """
+        Monitors time sinnce last user interaction in the GUI (checks every 15 seconds)
+        If the user has been inactive longer than 'SECONDS_UNTIL_AUTO_LOGOUT' -> the user
+        is automatically logged back out and the tool internally resets. 
+        """
 
         while GLOBAL_VALS["logged_in"] and not GLOBAL_VALS["stop_event_inactivity"].is_set():
             
@@ -622,6 +650,7 @@ class Sen2CubeTool:
                 # the inactivity reset bool parameter is used internally 
                 # to trigger the reset of parameters and to return to login page
                 parameters[self.INACTIVITY_RESET].value = True
+                GLOBAL_VALS["logout_reason"] = "inactive"
 
                 # reset token variables
                 GLOBAL_VALS["token_object"] = None
