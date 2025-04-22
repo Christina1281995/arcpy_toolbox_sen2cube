@@ -334,7 +334,7 @@ class Sen2CubeTool:
         if (parameters[self.INACTIVITY_RESET].value == True 
             or parameters[self.REFRESH_TOKEN_FAIL].value == True):
             self.stop_thread_to_monitor_inactivity()
-            self.stop_thread_to_monitor_refresh_time()
+            # self.stop_thread_to_monitor_refresh_time()
 
             for idx in range(self.FACTBASE, (self.OUTPUT_DIR +1)):
                 parameters[idx].enabled = False
@@ -597,12 +597,12 @@ class Sen2CubeTool:
             time.sleep(5)  # every 5 seconds is frequently enough + avoids too much CPU use
 
 
-    def start_thread_to_monitor_token_refresh_time(self):
+    def start_thread_to_monitor_token_refresh_time(self, parameters):
         """Starts the token monitoring in a new thread"""
 
         if GLOBAL_VALS["thread_refresh"] is None:
             GLOBAL_VALS["stop_event_refresh"].clear()  # reset the stop event
-            GLOBAL_VALS["thread_refresh"] = threading.Thread(target=self.thread_to_monitor_refresh_time)
+            GLOBAL_VALS["thread_refresh"] = threading.Thread(target=lambda: self.thread_to_monitor_refresh_time(parameters))
             GLOBAL_VALS["thread_refresh"].daemon = True  # makes sure the thread stops when the main program exits
             GLOBAL_VALS["thread_refresh"].start()
 
