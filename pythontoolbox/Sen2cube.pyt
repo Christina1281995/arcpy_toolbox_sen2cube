@@ -34,8 +34,6 @@ GLOBAL_VALS = {
     "logout_reason": ""
 }
 
-# DEBUGGING_TXT_FILE = r"C:/Users/chris/Documents/GitHub Repos/arcpy_toolbox_sen2cube/pythontoolbox/debugging.txt"
-# TOKEN_DEBUGGING_TXT_FILE = r"C:/Users/chris/Documents/GitHub Repos/arcpy_toolbox_sen2cube/pythontoolbox/token_debugging.txt"
 SECONDS_UNTIL_AUTO_LOGOUT = 360
 BUFFER_SECONDS_BEFORE_TOKEN_EXPIRY = 15
 
@@ -55,7 +53,7 @@ class Sen2CubeTool:
         """Define the tool (tool name is the name of the class)."""
         
         self.label = "Sen2Cube Inference"
-        self.description = "Authenticates the user in the Sen2Cube backend"
+        self.description = "The Sen2Cube.at toolbox is an ArcGIS Pro interface for the Sen2Cube.at platform."
 
         # param indices (makes it easier to work with them, rather than always refering to the indices)
         self.USERNAME = 0
